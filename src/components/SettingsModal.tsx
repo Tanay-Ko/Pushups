@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../hooks/useAuth'
@@ -84,6 +84,19 @@ export function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: (
             </div>
 
             <div className="mb-6">
+              <p className="text-sm text-muted mb-2">Notifications</p>
+              <div className="bg-background border border-border rounded-xl px-4 py-2 flex flex-col divide-y divide-border mb-6">
+                <NotificationToggle 
+                  label="Friend Milestones (50+ pushups)" 
+                  column="notify_milestones" 
+                  userId={profile?.id} 
+                />
+                <NotificationToggle 
+                  label="Friend Requests" 
+                  column="notify_friend_requests" 
+                  userId={profile?.id} 
+                />
+              </div>
               <p className="text-sm text-muted mb-2">Profile</p>
               <div className="bg-background border border-border rounded-xl px-4 py-3 text-sm flex justify-between items-center">
                 <span>@{profile?.username}</span>
@@ -116,5 +129,45 @@ export function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: (
         </motion.div>
       )}
     </AnimatePresence>
+  )
+}
+
+function NotificationToggle({ label, column, userId }: { label: string, column: string, userId?: string }) {
+  const [enabled, setEnabled] = useState(true)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!userId) return
+    supabase.from('profiles').select(column).eq('id', userId).single()
+      .then(({ data }) => {
+        if (data) {
+          setEnabled((data as any)[column])
+        }
+        setLoading(false)
+      })
+  }, [userId, column])
+
+  const toggle = async () => {
+    if (loading || !userId) return
+    const next = !enabled
+    setEnabled(next)
+    await supabase.from('profiles').update({ [column]: next }).eq('id', userId)
+  }
+
+  return (
+    <div className="flex justify-between items-center py-3">
+      <span className="text-sm">{label}</span>
+      <button 
+        onClick={toggle}
+        disabled={loading}
+        className={`w-11 h-6 rounded-full transition-colors relative ${enabled ? 'bg-accent' : 'bg-border'}`}
+      >
+        <motion.div 
+          className="absolute top-1 bottom-1 w-4 bg-background rounded-full"
+          animate={{ left: enabled ? '24px' : '4px' }}
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        />
+      </button>
+    </div>
   )
 }
