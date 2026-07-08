@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useEffect, type ReactNode } from 'react'
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import type { PanInfo } from 'framer-motion'
 import { usePushups } from './hooks/usePushups'
@@ -13,28 +13,17 @@ import { AuthScreen } from './components/AuthScreen'
 import { CreateProfileScreen } from './components/CreateProfileScreen'
 import { NavigationHandles } from './components/NavigationHandles'
 
-function useViewport() {
-  const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
-  useEffect(() => {
-    const onResize = () => setSize({ width: window.innerWidth, height: window.innerHeight })
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-  return size
-}
-
 function MainApp() {
   const { user, profile, loading: authLoading } = useAuth()
   const [screen, setScreen] = useState<Screen>('home')
   const { entries, add, update, remove, loading: dataLoading } = usePushups(user?.id)
   const stats = useMemo(() => computeStats(entries), [entries])
-  const { width, height } = useViewport()
 
-  const SCREEN_POSITIONS: Record<Screen, { x: number; y: number }> = {
-    home: { x: 0, y: 0 },
-    logging: { x: 0, y: -height },
-    stats: { x: -width, y: 0 },
-    friends: { x: width, y: 0 },
+  const SCREEN_POSITIONS: Record<Screen, { x: string; y: string }> = {
+    home: { x: '0%', y: '0%' },
+    logging: { x: '0%', y: '-100%' },
+    stats: { x: '-100%', y: '0%' },
+    friends: { x: '100%', y: '0%' },
   }
 
   const navigate = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
@@ -75,57 +64,71 @@ function MainApp() {
   }
 
   if (!user) {
-    return <AuthScreen />
+    return (
+      <div className="h-dvh w-full bg-black sm:bg-zinc-950 flex justify-center items-center">
+        <div className="h-full w-full max-w-md bg-background text-foreground relative shadow-2xl sm:h-[90vh] sm:rounded-3xl overflow-hidden">
+          <AuthScreen />
+        </div>
+      </div>
+    )
   }
 
   if (!profile) {
-    return <CreateProfileScreen />
+    return (
+      <div className="h-dvh w-full bg-black sm:bg-zinc-950 flex justify-center items-center">
+        <div className="h-full w-full max-w-md bg-background text-foreground relative shadow-2xl sm:h-[90vh] sm:rounded-3xl overflow-hidden">
+          <CreateProfileScreen />
+        </div>
+      </div>
+    )
   }
 
   const currentPos = SCREEN_POSITIONS[screen]
 
   return (
-    <div className="h-dvh w-full overflow-hidden bg-background text-foreground select-none touch-none relative">
-      
-      <NavigationHandles currentScreen={screen} />
+    <div className="h-dvh w-full bg-black sm:bg-zinc-950 flex justify-center items-center overflow-hidden">
+      <div className="h-full w-full max-w-md bg-background text-foreground relative shadow-2xl sm:h-[90vh] sm:rounded-[2.5rem] overflow-hidden select-none touch-none">
+        
+        <NavigationHandles currentScreen={screen} />
 
-      <motion.div
-        className="relative h-full w-full"
-        drag
-        dragConstraints={{ 
-          top: currentPos.y, 
-          bottom: currentPos.y, 
-          left: currentPos.x, 
-          right: currentPos.x 
-        }}
-        dragElastic={0.2}
-        onDragEnd={handleDragEnd}
-        animate={currentPos}
-        transition={{
-          type: 'spring',
-          stiffness: 300,
-          damping: 30,
-          mass: 0.8,
-        }}
-      >
-        <ScreenPanel position="home">
-          <HomeScreen lifetimeTotal={stats.lifetimeTotal} todayTotal={stats.todayTotal} />
-        </ScreenPanel>
-        <ScreenPanel position="logging">
-          <LoggingScreen
-            entries={entries}
-            onAdd={handleAdd}
-            onUpdate={handleUpdate}
-            onDelete={handleDelete}
-          />
-        </ScreenPanel>
-        <ScreenPanel position="stats">
-          <StatsScreen stats={stats} />
-        </ScreenPanel>
-        <ScreenPanel position="friends">
-          <FriendsScreen />
-        </ScreenPanel>
-      </motion.div>
+        <motion.div
+          className="relative h-full w-full"
+          drag
+          dragConstraints={{ 
+            top: 0, 
+            bottom: 0, 
+            left: 0, 
+            right: 0 
+          }}
+          dragElastic={0.2}
+          onDragEnd={handleDragEnd}
+          animate={currentPos}
+          transition={{
+            type: 'spring',
+            stiffness: 300,
+            damping: 30,
+            mass: 0.8,
+          }}
+        >
+          <ScreenPanel position="home">
+            <HomeScreen lifetimeTotal={stats.lifetimeTotal} todayTotal={stats.todayTotal} />
+          </ScreenPanel>
+          <ScreenPanel position="logging">
+            <LoggingScreen
+              entries={entries}
+              onAdd={handleAdd}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+            />
+          </ScreenPanel>
+          <ScreenPanel position="stats">
+            <StatsScreen stats={stats} />
+          </ScreenPanel>
+          <ScreenPanel position="friends">
+            <FriendsScreen />
+          </ScreenPanel>
+        </motion.div>
+      </div>
     </div>
   )
 }
