@@ -10,7 +10,7 @@ export function NavigationHandles({ currentScreen }: NavigationHandlesProps) {
   const bounceTransition = {
     duration: 3,
     repeat: Infinity,
-    ease: "easeInOut"
+    ease: "easeInOut" as const
   }
 
   // Handle components

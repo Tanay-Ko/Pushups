@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { NavigationHandles } from '../components/NavigationHandles'
 import { SettingsModal } from '../components/SettingsModal'
 import { APP_NAME } from '../constants'
 import { formatDate } from '../utils/dates'

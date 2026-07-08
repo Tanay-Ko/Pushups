@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useEffect, type ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import type { PanInfo } from 'framer-motion'
 import { usePushups } from './hooks/usePushups'
 import { SCREEN_TRANSITIONS, type Screen } from './hooks/useSwipeNavigation'
