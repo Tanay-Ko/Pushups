@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import type { Screen } from '../hooks/useSwipeNavigation'
 
 interface NavigationHandlesProps {
