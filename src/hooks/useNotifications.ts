@@ -28,8 +28,9 @@ export function useNotifications() {
     if (!user) return
     void fetchNotifications()
 
+    const channelName = `notifications-${user.id}-${Math.random()}`
     const subscription = supabase
-      .channel('notifications-channel')
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, () => {
         void fetchNotifications()
       })
