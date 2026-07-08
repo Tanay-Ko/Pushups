@@ -20,12 +20,12 @@ function MainApp() {
   const stats = useMemo(() => computeStats(entries), [entries])
 
   if (authLoading || (user && profile && dataLoading)) {
-    return <div className="h-dvh flex items-center justify-center bg-background text-foreground">Loading...</div>
+    return <div className="h-screen flex items-center justify-center bg-background text-foreground">Loading...</div>
   }
 
   if (!user) {
     return (
-      <div className="h-dvh w-full bg-black sm:bg-zinc-950 flex justify-center items-center">
+      <div className="h-screen w-full bg-black sm:bg-zinc-950 flex justify-center items-center">
         <div className="h-full w-full max-w-md bg-background text-foreground relative shadow-2xl sm:h-[90vh] sm:rounded-3xl overflow-hidden">
           <AuthScreen />
         </div>
@@ -35,7 +35,7 @@ function MainApp() {
 
   if (!profile) {
     return (
-      <div className="h-dvh w-full bg-black sm:bg-zinc-950 flex justify-center items-center">
+      <div className="h-screen w-full bg-black sm:bg-zinc-950 flex justify-center items-center">
         <div className="h-full w-full max-w-md bg-background text-foreground relative shadow-2xl sm:h-[90vh] sm:rounded-3xl overflow-hidden">
           <CreateProfileScreen />
         </div>
@@ -66,7 +66,7 @@ function MainApp() {
   }
 
   return (
-    <div className="h-dvh w-full bg-black sm:bg-zinc-950 flex justify-center items-center overflow-hidden">
+    <div className="h-screen w-full bg-black sm:bg-zinc-950 flex justify-center items-center overflow-hidden">
       <div className="h-full w-full max-w-md bg-background text-foreground relative shadow-2xl sm:h-[90vh] sm:rounded-[2.5rem] overflow-hidden select-none">
         
         {/* Main Content Area (padding bottom so it doesn't overlap tab bar) */}
