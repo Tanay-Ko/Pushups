@@ -14,6 +14,14 @@
     <title>PUSHUPS</title>
   </head>
   <body>
+    <script>
+      window.onerror = function(message, source, lineno, colno, error) {
+        document.body.innerHTML += '<div style="color:red;font-size:12px;padding:20px;z-index:99999;position:absolute;background:black;top:0;left:0;width:100%;height:100%;overflow:auto;"><b>Runtime Error:</b><br>' + message + '<br><br>' + (error && error.stack) + '</div>';
+      };
+      window.addEventListener('unhandledrejection', function(event) {
+        document.body.innerHTML += '<div style="color:red;font-size:12px;padding:20px;z-index:99999;position:absolute;background:black;top:0;left:0;width:100%;height:100%;overflow:auto;"><b>Unhandled Promise:</b><br>' + event.reason + '</div>';
+      });
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
