@@ -11,6 +11,7 @@ import { computeStats } from './utils/stats'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { AuthScreen } from './components/AuthScreen'
 import { CreateProfileScreen } from './components/CreateProfileScreen'
+import { NavigationHandles } from './components/NavigationHandles'
 
 function useViewport() {
   const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
@@ -86,21 +87,8 @@ function MainApp() {
   return (
     <div className="h-dvh w-full overflow-hidden bg-background text-foreground select-none touch-none relative">
       
-      <AnimatePresence>
-        {screen !== 'home' && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute top-8 left-6 z-50 p-3 bg-surface border border-border rounded-full shadow-lg text-muted hover:text-foreground"
-            onClick={() => setScreen('home')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-          </motion.button>
-        )}
-      </AnimatePresence>
+      <NavigationHandles currentScreen={screen} />
+
       <motion.div
         className="relative h-full w-full"
         drag

@@ -16,7 +16,6 @@ export function HomeScreen({ lifetimeTotal, todayTotal }: HomeScreenProps) {
 
   return (
     <div className="flex flex-col h-full px-6 pt-safe relative">
-      <NavigationHandles />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
       
       <header className="pt-8 pb-4 flex justify-between items-center">

@@ -53,6 +53,7 @@ export function AuthScreen() {
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            autoComplete="email"
             className="bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
           />
           <input
@@ -61,6 +62,7 @@ export function AuthScreen() {
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            autoComplete={isLogin ? "current-password" : "new-password"}
             className="bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
           />
           <motion.button
