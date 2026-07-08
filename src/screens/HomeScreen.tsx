@@ -45,7 +45,7 @@ export function HomeScreen({ lifetimeTotal, todayTotal }: HomeScreenProps) {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          className="text-7xl font-bold tabular-nums tracking-tight"
+          className="text-7xl font-bold tabular-nums tracking-tight text-gradient drop-shadow-sm pb-1"
         >
           {lifetimeTotal.toLocaleString()}
         </motion.p>

@@ -92,3 +92,14 @@
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
 }
+
+@utility text-gradient {
+  background-image: linear-gradient(to bottom right, var(--theme-gradient-start), var(--theme-gradient-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-gradient {
+  background-image: linear-gradient(to bottom right, var(--theme-gradient-start), var(--theme-gradient-end));
+}

@@ -32,7 +32,7 @@ export function AddPushupForm({ onAdd }: AddPushupFormProps) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.95 }}
         onClick={submit}
-        className="px-6 py-3 rounded-2xl bg-accent text-background font-semibold transition-colors"
+        className="px-6 py-3 rounded-2xl bg-gradient text-white font-semibold shadow-lg shadow-accent/20 transition-all"
       >
         Add
       </motion.button>

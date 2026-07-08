@@ -59,7 +59,7 @@ export function BottomTabBar({ currentScreen, onNavigate }: BottomTabBarProps) {
       {/* SVG Definitions for dynamic CSS variable gradients */}
       <svg width="0" height="0" className="absolute">
         <defs>
-          <linearGradient id="activeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="activeGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="var(--theme-gradient-start)" />
             <stop offset="100%" stopColor="var(--theme-gradient-end)" />
           </linearGradient>
