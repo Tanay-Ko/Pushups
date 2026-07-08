@@ -31,7 +31,7 @@ export function AuthScreen() {
   }
 
   return (
-    <div className="flex flex-col h-screen px-6 justify-center items-center">
+    <div className="flex flex-col h-full px-6 justify-center items-center">
       <Card className="w-full max-w-sm">
         <h2 className="text-2xl font-bold mb-2 text-center">
           {isLogin ? 'Welcome Back' : 'Create Account'}
