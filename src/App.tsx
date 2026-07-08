@@ -10,8 +10,10 @@ import { AuthProvider, useAuth } from './hooks/useAuth'
 import { AuthScreen } from './components/AuthScreen'
 import { CreateProfileScreen } from './components/CreateProfileScreen'
 import { BottomTabBar, type Screen } from './components/BottomTabBar'
+import { useAppTheme } from './hooks/useTheme'
 
 function MainApp() {
+  useAppTheme() // Initialize theme class on document element
   const { user, profile, loading: authLoading } = useAuth()
   const [screen, setScreen] = useState<Screen>('home')
   const { entries, add, update, remove, loading: dataLoading } = usePushups(user?.id)

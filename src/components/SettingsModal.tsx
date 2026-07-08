@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../hooks/useAuth'
+import { useAppTheme, type ThemeName } from '../hooks/useTheme'
 
 export function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const { signOut, profile } = useAuth()
+  const { theme, setTheme } = useAppTheme()
   const [newPassword, setNewPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -32,6 +34,14 @@ export function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: (
     setLoading(false)
   }
 
+  const themes: { id: ThemeName; label: string; color: string }[] = [
+    { id: 'default', label: 'Silver', color: '#fafafa' },
+    { id: 'neon', label: 'Neon', color: '#39ff14' },
+    { id: 'cyberpunk', label: 'Cyber', color: '#ff00ff' },
+    { id: 'ocean', label: 'Ocean', color: '#00e5ff' },
+    { id: 'sunset', label: 'Sunset', color: '#ff3366' }
+  ]
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -55,6 +65,22 @@ export function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: (
               <button onClick={onClose} className="p-2 text-muted hover:text-foreground">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-sm text-muted mb-2">Theme</p>
+              <div className="flex gap-2 justify-between bg-background border border-border rounded-xl p-2">
+                {themes.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTheme(t.id)}
+                    className={`flex-1 py-2 rounded-lg flex flex-col items-center gap-1 transition-colors ${theme === t.id ? 'bg-surface shadow-sm' : 'hover:bg-surface/50'}`}
+                  >
+                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: t.color }} />
+                    <span className="text-[10px] font-medium text-muted">{t.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="mb-6">
