@@ -10,6 +10,7 @@ export class SupabasePushupRepository implements PushupRepository {
     const { data, error } = await supabase
       .from('pushup_entries')
       .select('*')
+      .eq('user_id', user.id)
       .order('timestamp', { ascending: false })
 
     if (error) throw error
