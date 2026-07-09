@@ -15,7 +15,7 @@ export function HomeScreen({ lifetimeTotal, todayTotal }: HomeScreenProps) {
   const today = new Date()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
-  const { unreadCount } = useNotifications()
+  const { unreadCount, markAllAsRead } = useNotifications()
 
   return (
     <div className="flex flex-col h-full px-6 pt-safe relative">
@@ -28,7 +28,10 @@ export function HomeScreen({ lifetimeTotal, todayTotal }: HomeScreenProps) {
         </h1>
         <div className="flex items-center gap-2">
           <button 
-            onClick={() => setIsNotificationsOpen(true)}
+            onClick={() => {
+              setIsNotificationsOpen(true)
+              if (unreadCount > 0) markAllAsRead()
+            }}
             className="text-muted hover:text-foreground transition-colors p-2 relative"
             onPointerDown={e => e.stopPropagation()}
           >
@@ -37,7 +40,13 @@ export function HomeScreen({ lifetimeTotal, todayTotal }: HomeScreenProps) {
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-accent" />
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent text-background flex items-center justify-center text-[10px] font-bold shadow-sm"
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </motion.div>
             )}
           </button>
           <button 
