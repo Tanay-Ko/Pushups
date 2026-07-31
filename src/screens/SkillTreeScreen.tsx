@@ -15,7 +15,6 @@ interface SkillTreeScreenProps {
   onUpdateSkill?: (id: string, updates: Partial<Skill>) => void
   onDeleteSkill?: (id: string) => void
   onResetWorkspace?: () => void
-  onSelectSkillForLogging?: (skillId: string) => void
   onAddEntry?: (amount: number, skillId?: string, skillName?: string) => void
   viewMode?: TreeViewMode
   onSetViewMode?: (mode: TreeViewMode) => void
@@ -93,7 +92,6 @@ export function SkillTreeScreen({
 
   const skillsMap = useMemo(() => new Map(skills.map((s) => [s.id, s])), [skills])
 
-  // Calculate reps & points totals per skill (rounded to nearest tenth)
   const skillStats = useMemo(() => {
     const stats: Record<string, { reps: number; points: number }> = {}
     skills.forEach((s) => (stats[s.id] = { reps: 0, points: 0 }))
@@ -107,13 +105,11 @@ export function SkillTreeScreen({
     return stats
   }, [skills, entries, skillsMap])
 
-  // Filter skills if domain filter is selected
   const filteredSkills = useMemo(() => {
     if (filterDomain === 'all') return skills
     return skills.filter((s) => s.domain.toLowerCase() === filterDomain.toLowerCase())
   }, [skills, filterDomain])
 
-  // Calculate node progression depth (N-layer depth)
   const skillDepthMap = useMemo(() => {
     const depthMap = new Map<string, number>()
 
@@ -132,7 +128,6 @@ export function SkillTreeScreen({
     return depthMap
   }, [skills, skillsMap])
 
-  // Group skills by depth level (0 = base roots, 1 = tier 1, 2 = tier 2, 3 = tier 3, 4 = tier 4)
   const depthLevels = useMemo(() => {
     const levels: Map<number, Skill[]> = new Map()
     filteredSkills.forEach((s) => {
@@ -215,7 +210,7 @@ export function SkillTreeScreen({
   }
 
   return (
-    <div className="flex flex-col h-full px-4 pt-safe pb-safe relative overflow-hidden">
+    <div className="flex flex-col h-full px-3 sm:px-4 pt-safe pb-safe relative overflow-hidden">
       {/* Add / Edit Modal */}
       <AddSkillModal
         isOpen={isAddModalOpen || editingSkill !== null}
@@ -243,12 +238,12 @@ export function SkillTreeScreen({
       />
 
       {/* Screen Header */}
-      <header className="pt-6 pb-2 flex justify-between items-center z-10 shrink-0">
+      <header className="pt-4 sm:pt-6 pb-2 flex justify-between items-center z-10 shrink-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Skill Tree</h2>
-          <p className="text-xs text-muted mt-0.5">5-Layer Calisthenics Workspace</p>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Skill Tree</h2>
+          <p className="text-[10px] sm:text-xs text-muted mt-0.5">5-Layer Calisthenics Workspace</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* View Mode Toggle */}
           <div className="bg-surface border border-border/80 rounded-xl p-1 flex">
             <button
@@ -288,9 +283,9 @@ export function SkillTreeScreen({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsAddModalOpen(true)}
-            className="px-3 py-2 rounded-2xl bg-accent text-background text-xs font-bold shadow-lg shadow-accent/20 flex items-center gap-1 transition-all"
+            className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-accent text-background text-[11px] sm:text-xs font-bold shadow-lg shadow-accent/20 flex items-center gap-1 transition-all"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
@@ -300,13 +295,13 @@ export function SkillTreeScreen({
       </header>
 
       {/* Top Filter & Reset Toolbar */}
-      <div className="flex justify-between items-center mb-3 shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-semibold text-muted uppercase tracking-wider">Domain:</span>
+      <div className="flex justify-between items-center mb-2.5 shrink-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] sm:text-[11px] font-semibold text-muted uppercase tracking-wider">Domain:</span>
           <select
             value={filterDomain}
             onChange={(e) => setFilterDomain(e.target.value)}
-            className="bg-surface/80 border border-border/80 rounded-xl px-2.5 py-1 text-xs text-foreground font-medium focus:outline-none focus:border-accent"
+            className="bg-surface/80 border border-border/80 rounded-xl px-2 py-1 text-xs text-foreground font-medium focus:outline-none focus:border-accent"
           >
             <option value="all">All Domains (Points)</option>
             <option value="Push">Push</option>
@@ -319,7 +314,7 @@ export function SkillTreeScreen({
         {onResetWorkspace && (
           <button
             onClick={onResetWorkspace}
-            className="text-[10px] font-semibold text-muted hover:text-foreground bg-surface border border-border/60 px-2.5 py-1 rounded-full transition-colors"
+            className="text-[9px] sm:text-[10px] font-semibold text-muted hover:text-foreground bg-surface border border-border/60 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full transition-colors"
           >
             Reset Workspace
           </button>
@@ -338,70 +333,70 @@ export function SkillTreeScreen({
       )}
 
       {/* Active View Canvas Container */}
-      <div className="flex-1 overflow-y-auto pt-1 pb-14 space-y-6 scrollbar-none relative">
+      <div className="flex-1 overflow-y-auto pt-1 pb-20 space-y-4 scrollbar-none relative">
         {/* Selected Skill Action Card */}
-      <AnimatePresence>
-        {selectedSkill && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.96 }}
-            className="bg-surface border border-accent/60 rounded-2xl p-4 shadow-2xl relative overflow-hidden"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-accent" />
-                  <h3 className="text-base font-extrabold text-foreground">{selectedSkill.name}</h3>
-                  <span className="text-[10px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-md border border-accent/20">
-                    {formatPointsBadge(selectedSkill)}
-                  </span>
+        <AnimatePresence>
+          {selectedSkill && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.96 }}
+              className="bg-surface border border-accent/60 rounded-2xl p-3.5 sm:p-4 shadow-2xl relative overflow-hidden"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-accent" />
+                    <h3 className="text-sm sm:text-base font-extrabold text-foreground">{selectedSkill.name}</h3>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-md border border-accent/20">
+                      {formatPointsBadge(selectedSkill)}
+                    </span>
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-muted mt-0.5">
+                    Domain: {selectedSkill.domain} • Points:{' '}
+                    <strong className="text-accent font-bold">
+                      {(skillStats[selectedSkill.id]?.points || 0).toLocaleString()}
+                    </strong>{' '}
+                    ({(skillStats[selectedSkill.id]?.reps || 0).toLocaleString()} {selectedSkill.trackingType === 'time' ? 'secs' : 'reps'})
+                  </p>
                 </div>
-                <p className="text-xs text-muted mt-1">
-                  Domain: {selectedSkill.domain} • Tracking: {selectedSkill.trackingType === 'time' ? `Hold (${selectedSkill.timeUnitSeconds || 1}s/pt)` : 'Reps'} • Points:{' '}
-                  <strong className="text-accent font-bold">
-                    {(skillStats[selectedSkill.id]?.points || 0).toLocaleString()}
-                  </strong>{' '}
-                  ({(skillStats[selectedSkill.id]?.reps || 0).toLocaleString()} {selectedSkill.trackingType === 'time' ? 'secs' : 'reps'})
-                </p>
+                <button onClick={() => setSelectedSkillId(null)} className="p-1 text-muted hover:text-foreground">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               </div>
-              <button onClick={() => setSelectedSkillId(null)} className="p-1 text-muted hover:text-foreground">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
 
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/60">
-              <button
-                onClick={() => setIsQuickLogOpen(true)}
-                className="flex-1 py-2 rounded-xl bg-accent text-background font-bold text-xs shadow-md shadow-accent/20 flex items-center justify-center gap-1.5"
-              >
-                ⚡ Quick Log {selectedSkill.name}
-              </button>
-              <button
-                onClick={() => setEditingSkill(selectedSkill)}
-                className="px-3 py-2 rounded-xl border border-border text-foreground text-xs font-semibold hover:bg-white/5"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => setDeletingSkill(selectedSkill)}
-                className="px-3 py-2 rounded-xl border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/10"
-              >
-                Delete
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/60">
+                <button
+                  onClick={() => setIsQuickLogOpen(true)}
+                  className="flex-1 py-2 rounded-xl bg-accent text-background font-bold text-xs shadow-md shadow-accent/20 flex items-center justify-center gap-1"
+                >
+                  ⚡ Quick Log {selectedSkill.name}
+                </button>
+                <button
+                  onClick={() => setEditingSkill(selectedSkill)}
+                  className="px-3 py-2 rounded-xl border border-border text-foreground text-xs font-semibold hover:bg-white/5"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setDeletingSkill(selectedSkill)}
+                  className="px-3 py-2 rounded-xl border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/10"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* MODE 1: NODE GRAPH VIEW WITH SVG CONNECTING LINES */}
         {viewMode === 'node-graph' ? (
           <div
             ref={treeContainerRef}
-            className="bg-surface/30 border border-border/60 rounded-3xl p-5 shadow-2xl backdrop-blur-md min-h-[500px] flex flex-col relative overflow-hidden"
+            className="bg-surface/30 border border-border/60 rounded-3xl p-3.5 sm:p-5 shadow-2xl backdrop-blur-md min-h-[480px] min-w-[320px] flex flex-col relative overflow-hidden"
           >
             {/* SVG Connecting Overlay Lines */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
@@ -423,17 +418,17 @@ export function SkillTreeScreen({
               })}
             </svg>
 
-            <div className="text-center mb-6 z-10">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-muted bg-background/80 px-3 py-1 rounded-full border border-border/40 shadow-sm">
+            <div className="text-center mb-4 z-10">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-muted bg-background/80 px-2.5 py-0.5 rounded-full border border-border/40 shadow-sm">
                 5-Layer Skill Tree (Connected Pathways)
               </span>
             </div>
 
             {/* Render 5 Layers from Level 0 (Bottom) to Level 4 (Top) */}
-            <div className="flex flex-col-reverse justify-between gap-12 relative flex-1 z-10">
+            <div className="flex flex-col-reverse justify-between gap-10 sm:gap-12 relative flex-1 z-10">
               {depthLevels.map(({ depth, skills: levelSkills }) => (
                 <div key={depth} className="relative flex flex-col items-center">
-                  <div className="text-[9px] font-bold text-muted uppercase tracking-wider mb-3 bg-background/80 px-2.5 py-0.5 rounded-md border border-border/40 shadow-sm">
+                  <div className="text-[8px] sm:text-[9px] font-bold text-muted uppercase tracking-wider mb-2.5 bg-background/80 px-2 py-0.5 rounded-md border border-border/40 shadow-sm">
                     {depth === 0
                       ? 'Base Fundamentals (Layer 0)'
                       : depth === 1
@@ -445,7 +440,7 @@ export function SkillTreeScreen({
                       : 'Mastery (Layer 4)'}
                   </div>
 
-                  <div className="flex flex-wrap justify-center gap-3 sm:gap-5 w-full">
+                  <div className="flex flex-wrap justify-center gap-2.5 sm:gap-5 w-full">
                     {levelSkills.map((skill) => {
                       const style = getDomainStyle(skill.domain)
                       const isSelected = selectedSkillId === skill.id
@@ -469,7 +464,7 @@ export function SkillTreeScreen({
                         >
                           {/* Circular Node */}
                           <div
-                            className={`w-14 h-14 sm:w-18 sm:h-18 rounded-full border-2 flex flex-col items-center justify-center p-1 transition-all relative shadow-lg ${
+                            className={`w-13 h-13 sm:w-18 sm:h-18 rounded-full border-2 flex flex-col items-center justify-center p-1 transition-all relative shadow-lg ${
                               isSelected
                                 ? 'border-accent bg-accent/20 scale-110 shadow-accent/40 ring-4 ring-accent/30'
                                 : `${style.border} ${style.bg} hover:border-accent/60`
@@ -478,21 +473,21 @@ export function SkillTreeScreen({
                               boxShadow: isSelected ? `0 0 25px ${style.glow}` : undefined,
                             }}
                           >
-                            <span className={`w-2 h-2 rounded-full ${style.dot} mb-0.5`} />
-                            <span className="text-[10px] sm:text-xs font-black text-foreground text-center leading-tight max-w-[56px] sm:max-w-[64px] truncate">
+                            <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${style.dot} mb-0.5`} />
+                            <span className="text-[9px] sm:text-xs font-black text-foreground text-center leading-tight max-w-[50px] sm:max-w-[64px] truncate">
                               {skill.name}
                             </span>
-                            <span className="text-[8px] sm:text-[9px] font-bold text-accent mt-0.5">
+                            <span className="text-[7.5px] sm:text-[9px] font-bold text-accent mt-0.5">
                               {formatPointsBadge(skill)}
                             </span>
                           </div>
 
                           {/* Stat Pill below Node */}
-                          <div className="mt-1.5 text-center">
-                            <span className="block text-[9px] font-extrabold text-foreground tabular-nums">
+                          <div className="mt-1 text-center">
+                            <span className="block text-[8.5px] sm:text-[9px] font-extrabold text-foreground tabular-nums">
                               {pts.toLocaleString()} pts
                             </span>
-                            <span className="block text-[8px] text-muted">
+                            <span className="block text-[7.5px] sm:text-[8px] text-muted">
                               ({reps}{isTime ? 's' : 'r'})
                             </span>
                           </div>
@@ -506,7 +501,7 @@ export function SkillTreeScreen({
           </div>
         ) : (
           /* MODE 2: DETAILED CARDS VIEW */
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {filteredSkills.map((skill) => {
               const style = getDomainStyle(skill.domain)
               const isSelected = selectedSkillId === skill.id
@@ -520,23 +515,23 @@ export function SkillTreeScreen({
                   key={skill.id}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedSkillId(isSelected ? null : skill.id)}
-                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer relative ${
+                  className={`p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer relative ${
                     isSelected
                       ? 'bg-accent/15 border-accent shadow-md'
                       : 'bg-surface border-border/80 hover:border-accent/40'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${style.dot} shrink-0`} />
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-2.5 h-2.5 rounded-full ${style.dot} shrink-0`} />
                       <div>
-                        <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+                        <h4 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-1.5">
                           {skill.name}
-                          <span className={`text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full border ${style.bg} ${style.border} ${style.text}`}>
+                          <span className={`text-[8.5px] sm:text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full border ${style.bg} ${style.border} ${style.text}`}>
                             {skill.domain}
                           </span>
                         </h4>
-                        <p className="text-[11px] text-muted mt-0.5">
+                        <p className="text-[10px] sm:text-[11px] text-muted mt-0.5">
                           {parentSkill ? `Requires: ${parentSkill.name}` : 'Base Skill'} • Multiplier:{' '}
                           <strong className="text-accent">{formatPointsBadge(skill)}</strong>
                         </p>
@@ -544,10 +539,10 @@ export function SkillTreeScreen({
                     </div>
 
                     <div className="text-right">
-                      <span className="text-sm font-black text-accent tabular-nums">
+                      <span className="text-xs sm:text-sm font-black text-accent tabular-nums">
                         {pts.toLocaleString()} pts
                       </span>
-                      <span className="block text-[10px] text-muted">
+                      <span className="block text-[9px] sm:text-[10px] text-muted">
                         {reps.toLocaleString()} {isTime ? 'secs' : 'reps'}
                       </span>
                     </div>
@@ -565,10 +560,10 @@ export function SkillTreeScreen({
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={() => setIsQuickLogOpen(true)}
-          className="fixed bottom-20 right-5 z-40 bg-accent text-background font-extrabold px-4 py-3 rounded-full shadow-2xl shadow-accent/40 flex items-center gap-2 border border-white/20"
+          className="fixed bottom-24 right-4 sm:right-6 z-40 bg-accent text-background font-extrabold px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full shadow-2xl shadow-accent/40 flex items-center gap-1.5 border border-white/20"
         >
-          <span className="text-base">⚡</span>
-          <span className="text-xs tracking-wide">Quick Log</span>
+          <span className="text-sm sm:text-base">⚡</span>
+          <span className="text-[11px] sm:text-xs tracking-wide">Quick Log</span>
         </motion.button>
       )}
     </div>

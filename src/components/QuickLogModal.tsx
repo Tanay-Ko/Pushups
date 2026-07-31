@@ -70,14 +70,14 @@ export function QuickLogModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            className="w-full max-w-sm bg-surface border border-accent/50 rounded-3xl p-6 shadow-2xl overflow-hidden relative"
+            className="w-full max-w-sm bg-surface border border-accent/50 rounded-3xl p-5 sm:p-6 shadow-2xl overflow-hidden relative my-auto max-h-[85dvh] flex flex-col"
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -85,14 +85,14 @@ export function QuickLogModal({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-3 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-accent/15 border border-accent/30 text-accent flex items-center justify-center font-bold">
                   ⚡
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-foreground">Quick Log Set</h3>
-                  <p className="text-xs text-muted">Record progress without scrolling</p>
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">Quick Log Set</h3>
+                  <p className="text-[10px] sm:text-xs text-muted">Record set instantly</p>
                 </div>
               </div>
               <button
@@ -113,23 +113,23 @@ export function QuickLogModal({
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
-                  className="mb-4 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 p-2.5 rounded-2xl text-xs font-bold text-center"
+                  className="mb-3 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 p-2 rounded-xl text-xs font-bold text-center shrink-0"
                 >
                   🎉 Set logged! +{pointsPreview} points earned!
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3.5 overflow-y-auto pr-1 scrollbar-thin flex-1">
               {/* Skill Selector */}
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
                   Skill
                 </label>
                 <select
                   value={selectedSkillId}
                   onChange={(e) => setSelectedSkillId(e.target.value)}
-                  className="w-full bg-background border border-border rounded-2xl px-4 py-3 text-sm text-foreground font-semibold focus:outline-none focus:border-accent cursor-pointer"
+                  className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-foreground font-semibold focus:outline-none focus:border-accent cursor-pointer"
                 >
                   {skills.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -141,8 +141,8 @@ export function QuickLogModal({
 
               {/* Amount Input */}
               <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="block text-xs font-semibold text-muted uppercase tracking-wider">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider">
                     {isTime ? 'Duration in Seconds *' : 'Reps Count *'}
                   </label>
                   {pointsPreview > 0 && (
@@ -160,16 +160,16 @@ export function QuickLogModal({
                   placeholder={isTime ? 'e.g. 30 (seconds)' : 'e.g. 15 (reps)'}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-background border border-border rounded-2xl px-4 py-3 text-base font-bold tabular-nums text-foreground focus:outline-none focus:border-accent"
+                  className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-base font-bold tabular-nums text-foreground focus:outline-none focus:border-accent"
                 />
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-2.5 pt-2 shrink-0">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 rounded-2xl border border-border text-muted hover:text-foreground font-medium text-xs transition-colors"
+                  className="flex-1 py-2.5 rounded-xl border border-border text-muted hover:text-foreground font-medium text-xs sm:text-sm transition-colors"
                 >
                   Cancel
                 </button>
@@ -177,7 +177,7 @@ export function QuickLogModal({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.96 }}
                   type="submit"
-                  className="flex-1 py-3 rounded-2xl bg-accent text-background font-bold text-xs shadow-lg shadow-accent/20 transition-all"
+                  className="flex-1 py-2.5 rounded-xl bg-accent text-background font-bold text-xs sm:text-sm shadow-lg shadow-accent/20 transition-all"
                 >
                   + Add Set
                 </motion.button>

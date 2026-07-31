@@ -94,32 +94,32 @@ export function AddSkillModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            className="w-full max-w-md bg-surface border border-border/80 rounded-3xl p-6 shadow-2xl overflow-hidden relative max-h-[90vh] flex flex-col"
+            className="w-full max-w-md bg-surface border border-border/80 rounded-3xl p-4 sm:p-6 shadow-2xl overflow-hidden relative max-h-[85dvh] flex flex-col my-auto"
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-4 shrink-0">
+            <div className="flex justify-between items-center mb-3 shrink-0">
               <div>
-                <h3 className="text-xl font-bold text-foreground">
+                <h3 className="text-lg sm:text-xl font-bold text-foreground">
                   {editingSkill ? 'Edit Skill Node' : 'Add Skill Node'}
                 </h3>
-                <p className="text-xs text-muted mt-0.5">
+                <p className="text-[11px] sm:text-xs text-muted mt-0.5">
                   {editingSkill ? 'Update skill properties & points' : 'Expand your calisthenics skill tree'}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-muted hover:text-foreground rounded-full hover:bg-white/5 transition-colors"
+                className="p-1.5 text-muted hover:text-foreground rounded-full hover:bg-white/5 transition-colors"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -128,10 +128,10 @@ export function AddSkillModal({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-1 scrollbar-thin flex-1">
+            <form onSubmit={handleSubmit} className="space-y-3.5 overflow-y-auto pr-1 scrollbar-thin flex-1">
               {/* Skill Name */}
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
                   Skill Name *
                 </label>
                 <input
@@ -140,20 +140,20 @@ export function AddSkillModal({
                   placeholder="e.g. Plank Hold, Archer Pushup"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-background border border-border rounded-2xl px-4 py-3 text-sm placeholder:text-muted focus:outline-none focus:border-accent transition-colors"
+                  className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm placeholder:text-muted focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 
               {/* Tracking Type */}
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
                   Tracking Type
                 </label>
-                <div className="grid grid-cols-2 gap-2 bg-background border border-border rounded-2xl p-1.5">
+                <div className="grid grid-cols-2 gap-1.5 bg-background border border-border rounded-xl p-1">
                   <button
                     type="button"
                     onClick={() => setTrackingType('reps')}
-                    className={`py-2 text-xs font-bold rounded-xl transition-all ${
+                    className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
                       trackingType === 'reps'
                         ? 'bg-accent text-background shadow-sm'
                         : 'text-muted hover:text-foreground'
@@ -164,7 +164,7 @@ export function AddSkillModal({
                   <button
                     type="button"
                     onClick={() => setTrackingType('time')}
-                    className={`py-2 text-xs font-bold rounded-xl transition-all ${
+                    className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
                       trackingType === 'time'
                         ? 'bg-accent text-background shadow-sm'
                         : 'text-muted hover:text-foreground'
@@ -178,10 +178,10 @@ export function AddSkillModal({
               {/* Points Configuration */}
               {trackingType === 'reps' ? (
                 <div>
-                  <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
+                  <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
                     Points Per Rep (Whole Integer) *
                   </label>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <input
                       type="number"
                       step="1"
@@ -190,59 +190,59 @@ export function AddSkillModal({
                       placeholder="1"
                       value={pointsPerRep}
                       onChange={(e) => setPointsPerRep(e.target.value.replace(/[^0-9]/g, ''))}
-                      className="w-28 bg-background border border-border rounded-2xl px-4 py-3 text-sm font-extrabold text-accent focus:outline-none focus:border-accent"
+                      className="w-24 bg-background border border-border rounded-xl px-3 py-2 text-xs font-extrabold text-accent focus:outline-none focus:border-accent"
                     />
-                    <p className="text-[11px] text-muted leading-tight">
+                    <p className="text-[10px] sm:text-[11px] text-muted leading-tight">
                       Points earned for every single rep performed.
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3 bg-background/50 border border-border p-3.5 rounded-2xl">
+                <div className="space-y-2 bg-background/50 border border-border p-3 rounded-xl">
                   <div>
-                    <label className="block text-xs font-semibold text-accent uppercase tracking-wider mb-1">
+                    <label className="block text-[10px] font-semibold text-accent uppercase tracking-wider mb-1">
                       Time Points Weighting Scheme *
                     </label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-foreground font-semibold">Earn</span>
+                    <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                      <span className="text-foreground font-semibold">Earn</span>
                       <input
                         type="number"
                         min="1"
                         required
                         value={pointsPerRep}
                         onChange={(e) => setPointsPerRep(e.target.value.replace(/[^0-9]/g, ''))}
-                        className="w-16 bg-background border border-border rounded-xl px-2.5 py-2 text-xs font-extrabold text-accent text-center"
+                        className="w-14 bg-background border border-border rounded-lg px-2 py-1 text-xs font-extrabold text-accent text-center"
                       />
-                      <span className="text-xs text-foreground font-semibold">point(s) every</span>
+                      <span className="text-foreground font-semibold">pt(s) every</span>
                       <input
                         type="number"
                         min="1"
                         required
                         value={timeUnitSeconds}
                         onChange={(e) => setTimeUnitSeconds(e.target.value.replace(/[^0-9]/g, ''))}
-                        className="w-20 bg-background border border-border rounded-xl px-2.5 py-2 text-xs font-extrabold text-accent text-center"
+                        className="w-16 bg-background border border-border rounded-lg px-2 py-1 text-xs font-extrabold text-accent text-center"
                       />
-                      <span className="text-xs text-foreground font-semibold">seconds</span>
+                      <span className="text-foreground font-semibold">secs</span>
                     </div>
                   </div>
-                  <p className="text-[11px] text-muted leading-snug">
-                    Example: Earn 1 point every 30 seconds (a 45s Plank = 1.5 points, rounded to nearest tenth!).
+                  <p className="text-[10px] text-muted leading-tight">
+                    Example: Earn 1 point every 30 seconds (45s Plank = 1.5 pts).
                   </p>
                 </div>
               )}
 
               {/* Domain / Category */}
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
                   Domain / Category
                 </label>
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="flex flex-wrap gap-1.5 mb-1.5">
                   {DOMAIN_OPTIONS.map((d) => (
                     <button
                       key={d}
                       type="button"
                       onClick={() => setDomain(d)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                         domain === d
                           ? 'bg-accent text-background font-semibold shadow-sm'
                           : 'bg-background border border-border text-muted hover:text-foreground'
@@ -265,13 +265,13 @@ export function AddSkillModal({
 
               {/* Previous Skill */}
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
                   Previous Progression Skill (Parent Link)
                 </label>
                 <select
                   value={previousSkillId}
                   onChange={(e) => setPreviousSkillId(e.target.value)}
-                  className="w-full bg-background border border-border rounded-2xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent transition-colors cursor-pointer"
+                  className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:border-accent cursor-pointer"
                 >
                   <option value="">None (Root Node)</option>
                   {availablePreviousSkills.map((s) => (
@@ -283,11 +283,11 @@ export function AddSkillModal({
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex gap-3 pt-2 shrink-0">
+              <div className="flex gap-2.5 pt-2 shrink-0">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 rounded-2xl border border-border text-muted hover:text-foreground font-medium text-sm transition-colors"
+                  className="flex-1 py-2.5 rounded-xl border border-border text-muted hover:text-foreground font-medium text-xs sm:text-sm transition-colors"
                 >
                   Cancel
                 </button>
@@ -295,7 +295,7 @@ export function AddSkillModal({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.96 }}
                   type="submit"
-                  className="flex-1 py-3 rounded-2xl bg-accent text-background font-bold text-sm shadow-lg shadow-accent/20 transition-all"
+                  className="flex-1 py-2.5 rounded-xl bg-accent text-background font-bold text-xs sm:text-sm shadow-lg shadow-accent/20 transition-all"
                 >
                   {editingSkill ? 'Save Changes' : 'Add Node'}
                 </motion.button>
