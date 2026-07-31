@@ -2,25 +2,57 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { SettingsModal } from '../components/SettingsModal'
 import { NotificationsModal } from '../components/NotificationsModal'
+import { TutorialModal } from '../components/TutorialModal'
 import { APP_NAME } from '../constants'
 import { formatDate } from '../utils/dates'
 import { useNotifications } from '../hooks/useNotifications'
+import type { LogRetentionOption } from '../hooks/useLogRetention'
+import type { TreeViewMode } from '../hooks/useTreeSettings'
 
 interface HomeScreenProps {
-  lifetimeTotal: number
+  lifetimePoints: number
+  todayPoints: number
+  lifetimeTotal: number // Lifetime reps
   todayTotal: number
+  retention?: LogRetentionOption
+  onSetRetention?: (retention: LogRetentionOption) => void
+  treeViewMode?: TreeViewMode
+  onSetTreeViewMode?: (mode: TreeViewMode) => void
 }
 
-export function HomeScreen({ lifetimeTotal, todayTotal }: HomeScreenProps) {
+export function HomeScreen({
+  lifetimePoints,
+  todayPoints,
+  lifetimeTotal,
+  todayTotal,
+  retention,
+  onSetRetention,
+  treeViewMode,
+  onSetTreeViewMode,
+}: HomeScreenProps) {
   const today = new Date()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false)
+  const [metric, setMetric] = useState<'points' | 'reps'>('points')
   const { unreadCount, markAllAsRead } = useNotifications()
+
+  const mainTotal = metric === 'points' ? lifetimePoints : lifetimeTotal
+  const todayValue = metric === 'points' ? todayPoints : todayTotal
 
   return (
     <div className="flex flex-col h-full px-6 pt-safe relative">
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        retention={retention}
+        onSetRetention={onSetRetention}
+        treeViewMode={treeViewMode}
+        onSetTreeViewMode={onSetTreeViewMode}
+        onOpenTutorial={() => setIsTutorialOpen(true)}
+      />
       <NotificationsModal isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
+      <TutorialModal isOpen={isTutorialOpen} onClose={() => setIsTutorialOpen(false)} />
       
       <header className="pt-8 pb-4 flex justify-between items-center">
         <h1 className="text-sm font-medium tracking-widest text-muted uppercase">
@@ -68,36 +100,60 @@ export function HomeScreen({ lifetimeTotal, todayTotal }: HomeScreenProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        <p className="text-sm text-muted">Lifetime</p>
+        {/* Metric Toggle Selector */}
+        <div className="flex bg-surface border border-border/80 rounded-full p-1 mb-2">
+          <button
+            onClick={() => setMetric('points')}
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+              metric === 'points' ? 'bg-accent text-background shadow-sm' : 'text-muted hover:text-foreground'
+            }`}
+          >
+            Points
+          </button>
+          <button
+            onClick={() => setMetric('reps')}
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+              metric === 'reps' ? 'bg-accent text-background shadow-sm' : 'text-muted hover:text-foreground'
+            }`}
+          >
+            Total Reps
+          </button>
+        </div>
+
+        <p className="text-xs text-muted font-medium uppercase tracking-wider">
+          Lifetime {metric === 'points' ? 'Points' : 'Reps'}
+        </p>
         <motion.p 
-          key={lifetimeTotal}
+          key={`${metric}-${mainTotal}`}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           className="text-7xl font-bold tabular-nums tracking-tight text-gradient drop-shadow-sm pb-1"
         >
-          {lifetimeTotal.toLocaleString()}
+          {mainTotal.toLocaleString()}
         </motion.p>
-        <p className="text-lg text-muted mt-2">pushups</p>
+        <p className="text-sm text-muted">
+          {metric === 'points' ? 'skill points earned' : 'total exercise reps'}
+        </p>
 
         <motion.div 
-          className="mt-10 rounded-2xl bg-surface border border-border px-8 py-5 text-center cursor-pointer shadow-sm"
+          className="mt-8 rounded-2xl bg-surface border border-border px-8 py-4 text-center cursor-pointer shadow-sm"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.95 }}
         >
-          <p className="text-sm text-muted mb-1">Today</p>
+          <p className="text-xs text-muted mb-1 font-medium">Today</p>
           <motion.p 
-            key={todayTotal}
+            key={`${metric}-${todayValue}`}
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="text-3xl font-semibold tabular-nums"
+            className="text-3xl font-bold tabular-nums text-accent"
           >
-            {todayTotal}
+            {todayValue.toLocaleString()} <span className="text-sm font-normal text-muted">{metric}</span>
           </motion.p>
         </motion.div>
 
-        <p className="text-sm text-muted mt-6">{formatDate(today)}</p>
+        <p className="text-xs text-muted mt-6">{formatDate(today)}</p>
       </motion.div>
     </div>
   )

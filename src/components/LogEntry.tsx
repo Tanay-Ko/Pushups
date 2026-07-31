@@ -13,6 +13,8 @@ export function LogEntry({ entry, onUpdate, onDelete }: LogEntryProps) {
   const [editing, setEditing] = useState(false)
   const [amount, setAmount] = useState(String(entry.amount))
 
+  const isTime = entry.trackingType === 'time'
+
   const save = () => {
     const parsed = parseInt(amount, 10)
     if (!isNaN(parsed) && parsed > 0) {
@@ -27,7 +29,7 @@ export function LogEntry({ entry, onUpdate, onDelete }: LogEntryProps) {
   }
 
   return (
-    <motion.div 
+    <motion.div
       className="flex items-center justify-between gap-3 rounded-2xl bg-surface border border-border p-4 shadow-sm"
       whileHover={{ scale: 1.01 }}
     >
@@ -43,16 +45,24 @@ export function LogEntry({ entry, onUpdate, onDelete }: LogEntryProps) {
             autoFocus
           />
         ) : (
-          <motion.span 
+          <motion.div
             key={entry.amount}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-lg font-semibold tabular-nums"
+            className="flex flex-col"
           >
-            {entry.amount} pushups
-          </motion.span>
+            <span className="text-lg font-bold tabular-nums text-foreground">
+              {entry.amount}
+              <span className="text-xs font-semibold text-accent ml-1">
+                {isTime ? 'sec hold' : 'reps'}
+              </span>{' '}
+              <span className="text-sm font-semibold text-muted">
+                {entry.skillName || 'Push-ups'}
+              </span>
+            </span>
+          </motion.div>
         )}
-        <span className="text-sm text-muted">{formatTime(entry.timestamp)}</span>
+        <span className="text-xs text-muted/70">{formatTime(entry.timestamp)}</span>
       </div>
 
       <div className="flex gap-2 shrink-0">
@@ -61,14 +71,14 @@ export function LogEntry({ entry, onUpdate, onDelete }: LogEntryProps) {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={save}
-              className="px-3 py-1.5 rounded-xl bg-accent text-background text-sm font-medium"
+              className="px-3 py-1.5 rounded-xl bg-accent text-background text-xs font-bold"
             >
               Save
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={cancel}
-              className="px-3 py-1.5 rounded-xl border border-border text-sm text-muted"
+              className="px-3 py-1.5 rounded-xl border border-border text-xs text-muted"
             >
               Cancel
             </motion.button>
@@ -78,14 +88,14 @@ export function LogEntry({ entry, onUpdate, onDelete }: LogEntryProps) {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setEditing(true)}
-              className="px-3 py-1.5 rounded-xl border border-border text-sm"
+              className="px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-muted hover:text-foreground"
             >
               Edit
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => onDelete(entry.id)}
-              className="px-3 py-1.5 rounded-xl border border-border text-sm text-red-400"
+              className="px-3 py-1.5 rounded-xl border border-red-500/30 text-xs font-semibold text-red-400 hover:bg-red-500/10"
             >
               Delete
             </motion.button>

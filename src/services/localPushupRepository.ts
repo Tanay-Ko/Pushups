@@ -29,6 +29,8 @@ export class LocalPushupRepository implements PushupRepository {
     const newEntry: PushupEntry = {
       id: uuidv4(),
       amount: entry.amount,
+      skillId: entry.skillId,
+      skillName: entry.skillName,
       timestamp: entry.timestamp ?? now,
       createdAt: now,
       updatedAt: now,

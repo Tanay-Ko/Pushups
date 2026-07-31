@@ -4,7 +4,28 @@ import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../hooks/useAuth'
 import { useAppTheme, type ThemeName } from '../hooks/useTheme'
 
-export function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+import type { LogRetentionOption } from '../hooks/useLogRetention'
+import type { TreeViewMode } from '../hooks/useTreeSettings'
+
+interface SettingsModalProps {
+  isOpen: boolean
+  onClose: () => void
+  retention?: LogRetentionOption
+  onSetRetention?: (retention: LogRetentionOption) => void
+  treeViewMode?: TreeViewMode
+  onSetTreeViewMode?: (mode: TreeViewMode) => void
+  onOpenTutorial?: () => void
+}
+
+export function SettingsModal({
+  isOpen,
+  onClose,
+  retention,
+  onSetRetention,
+  treeViewMode,
+  onSetTreeViewMode,
+  onOpenTutorial,
+}: SettingsModalProps) {
   const { signOut, profile } = useAuth()
   const { theme, setTheme } = useAppTheme()
   const [newPassword, setNewPassword] = useState('')
@@ -46,14 +67,14 @@ export function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: (
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-background/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-background/80 backdrop-blur-sm overflow-y-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           {/* Prevent touches from bubbling down to the drag container */}
           <motion.div 
-            className="w-full max-w-sm bg-surface border border-border rounded-2xl p-6 shadow-xl"
+            className="w-full max-w-sm bg-surface border border-border rounded-2xl p-6 shadow-xl max-h-[90vh] overflow-y-auto scrollbar-thin"
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -66,6 +87,25 @@ export function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: (
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
+
+            {/* Prominent App Tutorial Button */}
+            {onOpenTutorial && (
+              <div className="mb-6">
+                <p className="text-sm text-muted mb-1.5">App Guide</p>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => {
+                    onClose()
+                    onOpenTutorial()
+                  }}
+                  className="w-full py-3 rounded-2xl bg-accent text-background font-extrabold text-xs shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
+                >
+                  <span>📖</span>
+                  <span>Open Interactive App Tutorial & Guide</span>
+                </motion.button>
+              </div>
+            )}
 
             <div className="mb-6">
               <p className="text-sm text-muted mb-2">Theme</p>
@@ -80,6 +120,59 @@ export function SettingsModal({ isOpen, onClose }: { isOpen: boolean, onClose: (
                     <span className="text-[10px] font-medium text-muted">{t.label}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Log Card Expiration Setting */}
+            <div className="mb-6">
+              <p className="text-sm text-muted mb-1">Log Card Expiration</p>
+              <p className="text-[11px] text-muted/80 mb-2">Duration logged workout cards remain visible on the Log tab</p>
+              <div className="grid grid-cols-4 gap-1.5 bg-background border border-border rounded-xl p-1.5">
+                {[
+                  { id: '1-day', label: '1 Day' },
+                  { id: '3-days', label: '3 Days' },
+                  { id: '7-days', label: '1 Week' },
+                  { id: 'never', label: 'Never' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => onSetRetention && onSetRetention(opt.id as any)}
+                    className={`py-1.5 text-center text-xs font-semibold rounded-lg transition-colors ${
+                      retention === opt.id
+                        ? 'bg-accent text-background shadow-sm'
+                        : 'text-muted hover:text-foreground'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Default Tree View Mode Setting */}
+            <div className="mb-6">
+              <p className="text-sm text-muted mb-1">Skill Tree View</p>
+              <div className="grid grid-cols-2 gap-2 bg-background border border-border rounded-xl p-1.5">
+                <button
+                  onClick={() => onSetTreeViewMode && onSetTreeViewMode('node-graph')}
+                  className={`py-2 text-center text-xs font-semibold rounded-lg transition-colors ${
+                    treeViewMode === 'node-graph'
+                      ? 'bg-accent text-background shadow-sm'
+                      : 'text-muted hover:text-foreground'
+                  }`}
+                >
+                  Node Graph (Nodes)
+                </button>
+                <button
+                  onClick={() => onSetTreeViewMode && onSetTreeViewMode('cards')}
+                  className={`py-2 text-center text-xs font-semibold rounded-lg transition-colors ${
+                    treeViewMode === 'cards'
+                      ? 'bg-accent text-background shadow-sm'
+                      : 'text-muted hover:text-foreground'
+                  }`}
+                >
+                  Detailed Cards
+                </button>
               </div>
             </div>
 

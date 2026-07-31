@@ -18,9 +18,11 @@ export class SupabasePushupRepository implements PushupRepository {
     return data.map(row => ({
       id: row.id,
       amount: row.amount,
+      skillId: row.skill_id,
+      skillName: row.skill_name,
       timestamp: row.timestamp,
       createdAt: row.created_at,
-      updatedAt: row.created_at, // Mocking updatedAt since we didn't add it to DB
+      updatedAt: row.created_at,
     }))
   }
 
@@ -29,13 +31,17 @@ export class SupabasePushupRepository implements PushupRepository {
     if (!user) throw new Error('Not authenticated')
 
     const now = new Date().toISOString()
+    const insertPayload: Record<string, any> = {
+      user_id: user.id,
+      amount: entry.amount,
+      timestamp: entry.timestamp || now,
+    }
+    if (entry.skillId) insertPayload.skill_id = entry.skillId
+    if (entry.skillName) insertPayload.skill_name = entry.skillName
+
     const { data, error } = await supabase
       .from('pushup_entries')
-      .insert({
-        user_id: user.id,
-        amount: entry.amount,
-        timestamp: entry.timestamp || now,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 
@@ -44,6 +50,8 @@ export class SupabasePushupRepository implements PushupRepository {
     return {
       id: data.id,
       amount: data.amount,
+      skillId: data.skill_id || entry.skillId,
+      skillName: data.skill_name || entry.skillName,
       timestamp: data.timestamp,
       createdAt: data.created_at,
       updatedAt: data.created_at,
