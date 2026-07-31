@@ -7,7 +7,6 @@ import { APP_NAME } from '../constants'
 import { formatDate } from '../utils/dates'
 import { useNotifications } from '../hooks/useNotifications'
 import type { LogRetentionOption } from '../hooks/useLogRetention'
-import type { TreeViewMode } from '../hooks/useTreeSettings'
 
 interface HomeScreenProps {
   lifetimePoints: number
@@ -16,8 +15,6 @@ interface HomeScreenProps {
   todayTotal: number
   retention?: LogRetentionOption
   onSetRetention?: (retention: LogRetentionOption) => void
-  treeViewMode?: TreeViewMode
-  onSetTreeViewMode?: (mode: TreeViewMode) => void
 }
 
 export function HomeScreen({
@@ -27,8 +24,6 @@ export function HomeScreen({
   todayTotal,
   retention,
   onSetRetention,
-  treeViewMode,
-  onSetTreeViewMode,
 }: HomeScreenProps) {
   const today = new Date()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -47,8 +42,6 @@ export function HomeScreen({
         onClose={() => setIsSettingsOpen(false)}
         retention={retention}
         onSetRetention={onSetRetention}
-        treeViewMode={treeViewMode}
-        onSetTreeViewMode={onSetTreeViewMode}
         onOpenTutorial={() => setIsTutorialOpen(true)}
       />
       <NotificationsModal isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />

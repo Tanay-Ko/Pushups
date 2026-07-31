@@ -5,15 +5,12 @@ import { useAuth } from '../hooks/useAuth'
 import { useAppTheme, type ThemeName } from '../hooks/useTheme'
 
 import type { LogRetentionOption } from '../hooks/useLogRetention'
-import type { TreeViewMode } from '../hooks/useTreeSettings'
 
 interface SettingsModalProps {
   isOpen: boolean
   onClose: () => void
   retention?: LogRetentionOption
   onSetRetention?: (retention: LogRetentionOption) => void
-  treeViewMode?: TreeViewMode
-  onSetTreeViewMode?: (mode: TreeViewMode) => void
   onOpenTutorial?: () => void
 }
 
@@ -22,8 +19,6 @@ export function SettingsModal({
   onClose,
   retention,
   onSetRetention,
-  treeViewMode,
-  onSetTreeViewMode,
   onOpenTutorial,
 }: SettingsModalProps) {
   const { signOut, profile } = useAuth()
@@ -146,33 +141,6 @@ export function SettingsModal({
                     {opt.label}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Default Tree View Mode Setting */}
-            <div className="mb-6">
-              <p className="text-sm text-muted mb-1">Skill Tree View</p>
-              <div className="grid grid-cols-2 gap-2 bg-background border border-border rounded-xl p-1.5">
-                <button
-                  onClick={() => onSetTreeViewMode && onSetTreeViewMode('node-graph')}
-                  className={`py-2 text-center text-xs font-semibold rounded-lg transition-colors ${
-                    treeViewMode === 'node-graph'
-                      ? 'bg-accent text-background shadow-sm'
-                      : 'text-muted hover:text-foreground'
-                  }`}
-                >
-                  Node Graph (Nodes)
-                </button>
-                <button
-                  onClick={() => onSetTreeViewMode && onSetTreeViewMode('cards')}
-                  className={`py-2 text-center text-xs font-semibold rounded-lg transition-colors ${
-                    treeViewMode === 'cards'
-                      ? 'bg-accent text-background shadow-sm'
-                      : 'text-muted hover:text-foreground'
-                  }`}
-                >
-                  Detailed Cards
-                </button>
               </div>
             </div>
 

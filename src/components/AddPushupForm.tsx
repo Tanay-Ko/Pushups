@@ -39,18 +39,21 @@ export function AddPushupForm({ skills, onAdd }: AddPushupFormProps) {
   }
 
   return (
-    <div className="space-y-3 relative">
+    <div className="space-y-2.5 relative">
+      {/* 40 / 60 Split Row: 40% Dropdown Selector | 60% Input Textbox */}
       <div className="flex gap-2 relative">
-        {/* Skill Selector Button */}
-        <div className="relative">
+        {/* 40% Skill Selector Button */}
+        <div className="w-[40%] relative">
           <motion.button
             whileTap={{ scale: 0.97 }}
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="h-full bg-surface border border-border hover:border-accent/50 rounded-2xl px-3.5 py-3 text-xs font-semibold text-foreground flex items-center gap-1.5 shadow-sm transition-all"
+            className="w-full h-full bg-surface border border-border hover:border-accent/50 rounded-2xl px-3 py-3 text-xs font-semibold text-foreground flex items-center justify-between gap-1 shadow-sm transition-all"
           >
-            <span className="w-2 h-2 rounded-full bg-accent shrink-0" />
-            <span className="max-w-[110px] truncate">{selectedSkill.name}</span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-accent shrink-0" />
+              <span className="truncate">{selectedSkill.name}</span>
+            </div>
             <svg
               width="14"
               height="14"
@@ -58,35 +61,35 @@ export function AddPushupForm({ skills, onAdd }: AddPushupFormProps) {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className={`text-muted transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+              className={`text-muted transition-transform shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`}
             >
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </motion.button>
         </div>
 
-        {/* Input for Reps or Time (Seconds) */}
+        {/* 60% Input for Reps or Time (Seconds) */}
         <input
           type="number"
           inputMode="numeric"
           min={1}
-          placeholder={isTimeSkill ? 'Duration in seconds?' : 'How many reps?'}
+          placeholder={isTimeSkill ? 'Duration (sec)?' : 'How many reps?'}
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submit()}
-          className="flex-1 bg-background border border-border rounded-2xl px-4 py-3 text-base placeholder:text-muted focus:outline-none focus:border-accent transition-colors"
+          className="w-[60%] bg-background border border-border rounded-2xl px-4 py-3 text-sm sm:text-base placeholder:text-muted focus:outline-none focus:border-accent transition-colors font-semibold"
         />
-
-        {/* Submit Button */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={submit}
-          className="px-5 py-3 rounded-2xl bg-accent text-background font-bold text-sm shadow-lg shadow-accent/20 transition-all shrink-0"
-        >
-          Add
-        </motion.button>
       </div>
+
+      {/* Full Width Submit Button Below Input Row */}
+      <motion.button
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.96 }}
+        onClick={submit}
+        className="w-full py-3 rounded-2xl bg-accent text-background font-extrabold text-sm shadow-lg shadow-accent/20 transition-all flex items-center justify-center gap-2"
+      >
+        <span>+ Add Set</span>
+      </motion.button>
 
       {/* Searchable Skill Dropdown Overlay */}
       <AnimatePresence>

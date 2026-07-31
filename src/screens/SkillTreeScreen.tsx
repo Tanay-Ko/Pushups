@@ -560,10 +560,10 @@ export function SkillTreeScreen({
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={() => setIsQuickLogOpen(true)}
-          className="fixed bottom-24 right-4 sm:right-6 z-40 bg-accent text-background font-extrabold px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full shadow-2xl shadow-accent/40 flex items-center gap-1.5 border border-white/20"
+          className="fixed bottom-24 right-4 sm:right-6 z-40 w-32 sm:w-36 py-3 px-3 bg-accent text-background font-extrabold rounded-full shadow-2xl shadow-accent/40 flex items-center justify-center gap-1.5 border border-white/20"
         >
-          <span className="text-sm sm:text-base">⚡</span>
-          <span className="text-[11px] sm:text-xs tracking-wide">Quick Log</span>
+          <span className="text-xs sm:text-sm shrink-0">⚡</span>
+          <span className="text-[11px] sm:text-xs tracking-wide truncate">Quick Log</span>
         </motion.button>
       )}
     </div>
