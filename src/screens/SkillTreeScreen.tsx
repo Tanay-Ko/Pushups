@@ -428,16 +428,8 @@ export function SkillTreeScreen({
             <div className="flex flex-col-reverse justify-between gap-10 sm:gap-12 relative flex-1 z-10">
               {depthLevels.map(({ depth, skills: levelSkills }) => (
                 <div key={depth} className="relative flex flex-col items-center">
-                  <div className="text-[8px] sm:text-[9px] font-bold text-muted uppercase tracking-wider mb-2.5 bg-background/80 px-2 py-0.5 rounded-md border border-border/40 shadow-sm">
-                    {depth === 0
-                      ? 'Base Fundamentals (Layer 0)'
-                      : depth === 1
-                      ? 'Intermediate (Layer 1)'
-                      : depth === 2
-                      ? 'Advanced (Layer 2)'
-                      : depth === 3
-                      ? 'Elite (Layer 3)'
-                      : 'Mastery (Layer 4)'}
+                  <div className="text-[8.5px] sm:text-[9.5px] font-extrabold text-muted uppercase tracking-widest mb-2.5 bg-background/90 px-2.5 py-0.5 rounded-md border border-border/40 shadow-sm">
+                    Layer {depth}
                   </div>
 
                   <div className="flex flex-wrap justify-center gap-2.5 sm:gap-5 w-full">
@@ -445,8 +437,6 @@ export function SkillTreeScreen({
                       const style = getDomainStyle(skill.domain)
                       const isSelected = selectedSkillId === skill.id
                       const pts = skillStats[skill.id]?.points || 0
-                      const reps = skillStats[skill.id]?.reps || 0
-                      const isTime = skill.trackingType === 'time'
 
                       return (
                         <motion.div
@@ -482,13 +472,10 @@ export function SkillTreeScreen({
                             </span>
                           </div>
 
-                          {/* Stat Pill below Node */}
+                          {/* Stat Pill below Node (Points Only) */}
                           <div className="mt-1 text-center">
                             <span className="block text-[8.5px] sm:text-[9px] font-extrabold text-foreground tabular-nums">
                               {pts.toLocaleString()} pts
-                            </span>
-                            <span className="block text-[7.5px] sm:text-[8px] text-muted">
-                              ({reps}{isTime ? 's' : 'r'})
                             </span>
                           </div>
                         </motion.div>
@@ -560,7 +547,7 @@ export function SkillTreeScreen({
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={() => setIsQuickLogOpen(true)}
-          className="fixed bottom-24 right-4 sm:right-6 z-40 w-32 sm:w-36 py-3 px-3 bg-accent text-background font-extrabold rounded-full shadow-2xl shadow-accent/40 flex items-center justify-center gap-1.5 border border-white/20"
+          className="fixed bottom-26 sm:bottom-28 right-4 sm:right-6 z-40 w-32 sm:w-36 py-3 px-3 bg-accent text-background font-extrabold rounded-full shadow-2xl shadow-accent/40 flex items-center justify-center gap-1.5 border border-white/20"
         >
           <span className="text-xs sm:text-sm shrink-0">⚡</span>
           <span className="text-[11px] sm:text-xs tracking-wide truncate">Quick Log</span>

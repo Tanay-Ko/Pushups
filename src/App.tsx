@@ -129,7 +129,7 @@ function MainApp() {
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
             onClick={() => setIsTutorialOpen(true)}
-            className="fixed bottom-24 left-4 sm:left-6 z-40 w-32 sm:w-36 py-3 px-3 bg-surface border border-accent/60 text-foreground font-extrabold rounded-full shadow-2xl flex items-center justify-center gap-1.5 backdrop-blur-md"
+            className="fixed bottom-26 sm:bottom-28 left-4 sm:left-6 z-40 w-32 sm:w-36 py-3 px-3 bg-surface border border-accent/60 text-foreground font-extrabold rounded-full shadow-2xl flex items-center justify-center gap-1.5 backdrop-blur-md"
           >
             <span className="text-xs sm:text-sm shrink-0">📖</span>
             <span className="text-[11px] sm:text-xs tracking-wide font-bold truncate">App Guide</span>
