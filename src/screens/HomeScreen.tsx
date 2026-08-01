@@ -11,8 +11,8 @@ import type { LogRetentionOption } from '../hooks/useLogRetention'
 interface HomeScreenProps {
   lifetimePoints: number
   todayPoints: number
-  lifetimeTotal: number // Lifetime reps
-  todayTotal: number
+  lifetimeTotal?: number
+  todayTotal?: number
   retention?: LogRetentionOption
   onSetRetention?: (retention: LogRetentionOption) => void
 }
@@ -20,8 +20,6 @@ interface HomeScreenProps {
 export function HomeScreen({
   lifetimePoints,
   todayPoints,
-  lifetimeTotal,
-  todayTotal,
   retention,
   onSetRetention,
 }: HomeScreenProps) {
@@ -29,11 +27,7 @@ export function HomeScreen({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isTutorialOpen, setIsTutorialOpen] = useState(false)
-  const [metric, setMetric] = useState<'points' | 'reps'>('points')
   const { unreadCount, markAllAsRead } = useNotifications()
-
-  const mainTotal = metric === 'points' ? lifetimePoints : lifetimeTotal
-  const todayValue = metric === 'points' ? todayPoints : todayTotal
 
   return (
     <div className="flex flex-col h-full px-6 pt-safe relative">
@@ -93,40 +87,20 @@ export function HomeScreen({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        {/* Metric Toggle Selector */}
-        <div className="flex bg-surface border border-border/80 rounded-full p-1 mb-2">
-          <button
-            onClick={() => setMetric('points')}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-              metric === 'points' ? 'bg-accent text-background shadow-sm' : 'text-muted hover:text-foreground'
-            }`}
-          >
-            Points
-          </button>
-          <button
-            onClick={() => setMetric('reps')}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-              metric === 'reps' ? 'bg-accent text-background shadow-sm' : 'text-muted hover:text-foreground'
-            }`}
-          >
-            Total Reps
-          </button>
-        </div>
-
-        <p className="text-xs text-muted font-medium uppercase tracking-wider">
-          Lifetime {metric === 'points' ? 'Points' : 'Reps'}
+        <p className="text-xs text-muted font-bold uppercase tracking-widest bg-surface border border-border/80 px-3 py-1 rounded-full shadow-sm">
+          Lifetime Points
         </p>
         <motion.p 
-          key={`${metric}-${mainTotal}`}
+          key={lifetimePoints}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          className="text-7xl font-bold tabular-nums tracking-tight text-gradient drop-shadow-sm pb-1"
+          className="text-7xl font-extrabold tabular-nums tracking-tight text-gradient drop-shadow-sm pb-1"
         >
-          {mainTotal.toLocaleString()}
+          {lifetimePoints.toLocaleString()}
         </motion.p>
         <p className="text-sm text-muted">
-          {metric === 'points' ? 'skill points earned' : 'total exercise reps'}
+          skill points earned
         </p>
 
         <motion.div 
@@ -134,15 +108,15 @@ export function HomeScreen({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.95 }}
         >
-          <p className="text-xs text-muted mb-1 font-medium">Today</p>
+          <p className="text-xs text-muted mb-1 font-medium">Today Points</p>
           <motion.p 
-            key={`${metric}-${todayValue}`}
+            key={todayPoints}
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className="text-3xl font-bold tabular-nums text-accent"
           >
-            {todayValue.toLocaleString()} <span className="text-sm font-normal text-muted">{metric}</span>
+            {todayPoints.toLocaleString()} <span className="text-sm font-normal text-muted">pts</span>
           </motion.p>
         </motion.div>
 

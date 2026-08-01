@@ -40,7 +40,7 @@ export function AddSkillModal({
         setCustomDomain(editingSkill.domain)
       }
       setPreviousSkillId(editingSkill.previousSkillId || '')
-      setPointsPerRep(String(Math.round(editingSkill.pointsPerRep || 1)))
+      setPointsPerRep(String(editingSkill.pointsPerRep ?? 1))
       setTrackingType(editingSkill.trackingType || 'reps')
       setTimeUnitSeconds(String(editingSkill.timeUnitSeconds || 30))
     } else {
@@ -59,8 +59,8 @@ export function AddSkillModal({
     if (!name.trim()) return
 
     const finalDomain = domain === 'Custom' ? (customDomain.trim() || 'Custom') : domain
-    const parsedPoints = parseInt(pointsPerRep, 10)
-    const validPoints = !isNaN(parsedPoints) && parsedPoints > 0 ? parsedPoints : 1
+    const parsedPoints = parseFloat(pointsPerRep)
+    const validPoints = !isNaN(parsedPoints) && parsedPoints > 0 ? Math.round(parsedPoints * 10) / 10 : 1
 
     const parsedSeconds = parseInt(timeUnitSeconds, 10)
     const validSeconds = !isNaN(parsedSeconds) && parsedSeconds > 0 ? parsedSeconds : 1
@@ -179,21 +179,21 @@ export function AddSkillModal({
               {trackingType === 'reps' ? (
                 <div>
                   <label className="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
-                    Points Per Rep (Whole Integer) *
+                    Points Per Rep (Decimals Allowed, e.g. 0.5, 1.5, 2) *
                   </label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
-                      step="1"
-                      min="1"
+                      step="0.1"
+                      min="0.1"
                       required
-                      placeholder="1"
+                      placeholder="1.0"
                       value={pointsPerRep}
-                      onChange={(e) => setPointsPerRep(e.target.value.replace(/[^0-9]/g, ''))}
+                      onChange={(e) => setPointsPerRep(e.target.value)}
                       className="w-24 bg-background border border-border rounded-xl px-3 py-2 text-xs font-extrabold text-accent focus:outline-none focus:border-accent"
                     />
                     <p className="text-[10px] sm:text-[11px] text-muted leading-tight">
-                      Points earned for every single rep performed.
+                      Points multiplier earned per rep (supports tenths place).
                     </p>
                   </div>
                 </div>
@@ -207,11 +207,12 @@ export function AddSkillModal({
                       <span className="text-foreground font-semibold">Earn</span>
                       <input
                         type="number"
-                        min="1"
+                        step="0.1"
+                        min="0.1"
                         required
                         value={pointsPerRep}
-                        onChange={(e) => setPointsPerRep(e.target.value.replace(/[^0-9]/g, ''))}
-                        className="w-14 bg-background border border-border rounded-lg px-2 py-1 text-xs font-extrabold text-accent text-center"
+                        onChange={(e) => setPointsPerRep(e.target.value)}
+                        className="w-16 bg-background border border-border rounded-lg px-2 py-1 text-xs font-extrabold text-accent text-center"
                       />
                       <span className="text-foreground font-semibold">pt(s) every</span>
                       <input
@@ -226,7 +227,7 @@ export function AddSkillModal({
                     </div>
                   </div>
                   <p className="text-[10px] text-muted leading-tight">
-                    Example: Earn 1 point every 30 seconds (45s Plank = 1.5 pts).
+                    Example: Earn 0.5 points every 10 seconds (30s Plank = 1.5 pts).
                   </p>
                 </div>
               )}
