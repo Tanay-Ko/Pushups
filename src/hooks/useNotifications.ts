@@ -13,7 +13,7 @@ export type Notification = {
 const WELCOME_NOTIFICATION_KEY = 'calisthenics_welcome_notif_v1'
 
 const WELCOME_NOTIFICATION_CONTENT =
-  'Welcome to Pushups & Calisthenics! 🎯 Tap Settings ⚙️ -> Open App Tutorial & Guide to learn how to navigate the 5-Layer Skill Tree, customize Points Schemes, and use Quick Logging!'
+  'Welcome to Pushups & Calisthenics! 🎯 Tap Settings ⚙️ -> Open App Tutorial & Guide to learn how to navigate the Skill Tree, customize Points Schemes, and use Quick Logging!'
 
 export function useNotifications() {
   const { user } = useAuth()

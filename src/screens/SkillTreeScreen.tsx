@@ -241,7 +241,7 @@ export function SkillTreeScreen({
       <header className="pt-4 sm:pt-6 pb-2 flex justify-between items-center z-10 shrink-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Skill Tree</h2>
-          <p className="text-[10px] sm:text-xs text-muted mt-0.5">5-Layer Calisthenics Workspace</p>
+          <p className="text-[10px] sm:text-xs text-muted mt-0.5">Dynamic Calisthenics Workspace</p>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* View Mode Toggle */}
