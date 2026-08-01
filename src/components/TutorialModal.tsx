@@ -29,16 +29,16 @@ const TUTORIAL_STEPS = [
   },
   {
     step: 2,
-    title: '5-Layer Skill Tree & Glowing Pathways 🌳',
-    subtitle: 'Scale from Layer 0 Basics to Layer 4 Master Skills',
+    title: 'Dynamic Skill Tree & Glowing Pathways 🌳',
+    subtitle: 'Unlimited progression layers with connected pathways',
     icon: '🌿',
     content: (
       <div className="space-y-3 text-sm text-muted leading-relaxed">
         <p>
-          Head to the <strong className="text-foreground">Tree tab</strong> to view your interactive skill progression across 5 difficulty tiers:
+          Head to the <strong className="text-foreground">Tree tab</strong> to view your interactive skill tree:
         </p>
         <ul className="list-disc list-inside space-y-1.5 text-xs text-muted">
-          <li><strong className="text-foreground">Layer 0 to 4:</strong> Progression flows from foundational roots (Layer 0) up to elite master moves (Layer 4).</li>
+          <li><strong className="text-foreground">Unlimited Layers:</strong> Progression flows dynamically from base roots (Layer 0) up through Layer 1, Layer 2, Layer 3, Layer 4, and beyond!</li>
           <li><strong className="text-foreground">Glowing Pathways:</strong> Faint glowing lines connect prerequisite exercises to advanced progressions.</li>
           <li><strong className="text-foreground">Color Domains:</strong> Gold for Push, Blue for Pull, Emerald for Core, Rose for Legs, Purple for Skills.</li>
           <li><strong className="text-foreground">Customization:</strong> Add custom exercises, edit pathways, or clear nodes as you see fit.</li>

@@ -420,7 +420,7 @@ export function SkillTreeScreen({
 
             <div className="text-center mb-4 z-10">
               <span className="text-[9px] font-bold uppercase tracking-widest text-muted bg-background/80 px-2.5 py-0.5 rounded-full border border-border/40 shadow-sm">
-                5-Layer Skill Tree (Connected Pathways)
+                Dynamic Skill Tree (Connected Pathways)
               </span>
             </div>
 
