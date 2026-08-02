@@ -13,13 +13,16 @@ export class SupabasePushupRepository implements PushupRepository {
       .eq('user_id', user.id)
       .order('timestamp', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase getAll error:', error)
+      throw new Error(error.message || 'Failed to fetch entries')
+    }
 
-    return data.map(row => ({
+    return (data || []).map(row => ({
       id: row.id,
       amount: row.amount,
-      skillId: row.skill_id,
-      skillName: row.skill_name,
+      skillId: row.skill_id || undefined,
+      skillName: row.skill_name || undefined,
       timestamp: row.timestamp,
       createdAt: row.created_at,
       updatedAt: row.created_at,
@@ -39,14 +42,33 @@ export class SupabasePushupRepository implements PushupRepository {
     if (entry.skillId) insertPayload.skill_id = entry.skillId
     if (entry.skillName) insertPayload.skill_name = entry.skillName
 
-    const { data, error } = await supabase
+    let res = await supabase
       .from('pushup_entries')
       .insert(insertPayload)
       .select()
       .single()
 
-    if (error) throw error
+    // Fallback: If custom skill columns do not exist yet in Supabase schema, retry with basic payload
+    if (res.error && (res.error.code === 'PGRST204' || res.error.message?.includes('skill_id') || res.error.message?.includes('column'))) {
+      console.warn('Skill columns not found in Supabase table. Retrying with basic payload...')
+      const basicPayload = {
+        user_id: user.id,
+        amount: entry.amount,
+        timestamp: entry.timestamp || now,
+      }
+      res = await supabase
+        .from('pushup_entries')
+        .insert(basicPayload)
+        .select()
+        .single()
+    }
 
+    if (res.error) {
+      console.error('Supabase add error:', res.error)
+      throw new Error(res.error.message || 'Failed to save entry')
+    }
+
+    const data = res.data
     return {
       id: data.id,
       amount: data.amount,
@@ -69,11 +91,16 @@ export class SupabasePushupRepository implements PushupRepository {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase update error:', error)
+      throw new Error(error.message || 'Failed to update entry')
+    }
 
     return {
       id: data.id,
       amount: data.amount,
+      skillId: data.skill_id || undefined,
+      skillName: data.skill_name || undefined,
       timestamp: data.timestamp,
       createdAt: data.created_at,
       updatedAt: data.created_at,
@@ -86,7 +113,10 @@ export class SupabasePushupRepository implements PushupRepository {
       .delete()
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase delete error:', error)
+      throw new Error(error.message || 'Failed to delete entry')
+    }
   }
 }
 

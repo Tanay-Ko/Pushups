@@ -11,32 +11,45 @@ export function usePushups(userId?: string) {
 
   const migrateLocalData = async () => {
     if (!userId) return
-    const localEntries = await localPushupRepository.getAll()
-    if (localEntries.length > 0) {
-      console.log('Migrating local data to Supabase...')
-      for (const entry of localEntries) {
-        try {
-          await supabasePushupRepository.add({
-            amount: entry.amount,
-            timestamp: entry.timestamp,
-          })
-          await localPushupRepository.delete(entry.id)
-        } catch (e) {
-          console.error('Failed to migrate entry:', e)
+    try {
+      const localEntries = await localPushupRepository.getAll()
+      if (localEntries.length > 0) {
+        console.log('Migrating local data to Supabase...')
+        for (const entry of localEntries) {
+          try {
+            await supabasePushupRepository.add({
+              amount: entry.amount,
+              skillId: entry.skillId,
+              skillName: entry.skillName,
+              timestamp: entry.timestamp,
+            })
+            await localPushupRepository.delete(entry.id)
+          } catch (e) {
+            console.error('Failed to migrate entry:', e)
+          }
         }
       }
+    } catch (e) {
+      console.error('Migration error:', e)
     }
   }
 
   const refresh = useCallback(async () => {
     setLoading(true)
-    if (userId) {
-      await migrateLocalData()
+    try {
+      if (userId) {
+        await migrateLocalData()
+      }
+      const data = await activeRepository.getAll()
+      setEntries(data)
+    } catch (e) {
+      console.warn('Failed to load from active repository, falling back to local:', e)
+      const localData = await localPushupRepository.getAll()
+      setEntries(localData)
+    } finally {
+      setLoading(false)
     }
-    const data = await activeRepository.getAll()
-    setEntries(data)
-    setLoading(false)
-  }, [userId])
+  }, [userId, activeRepository])
 
   useEffect(() => {
     void refresh()
@@ -44,24 +57,42 @@ export function usePushups(userId?: string) {
 
   const add = useCallback(
     async (entry: CreatePushupEntry) => {
-      await activeRepository.add(entry)
-      await refresh()
+      try {
+        await activeRepository.add(entry)
+      } catch (err) {
+        console.warn('Repository add failed, saving to local repository fallback:', err)
+        await localPushupRepository.add(entry)
+      } finally {
+        await refresh()
+      }
     },
     [refresh, activeRepository],
   )
 
   const update = useCallback(
     async (id: string, updates: UpdatePushupEntry) => {
-      await activeRepository.update(id, updates)
-      await refresh()
+      try {
+        await activeRepository.update(id, updates)
+      } catch (err) {
+        console.warn('Repository update failed, updating local repository fallback:', err)
+        await localPushupRepository.update(id, updates)
+      } finally {
+        await refresh()
+      }
     },
     [refresh, activeRepository],
   )
 
   const remove = useCallback(
     async (id: string) => {
-      await activeRepository.delete(id)
-      await refresh()
+      try {
+        await activeRepository.delete(id)
+      } catch (err) {
+        console.warn('Repository delete failed, deleting from local repository fallback:', err)
+        await localPushupRepository.delete(id)
+      } finally {
+        await refresh()
+      }
     },
     [refresh, activeRepository],
   )
