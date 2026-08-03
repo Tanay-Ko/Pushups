@@ -83,6 +83,7 @@ export function LoggingScreen({
               >
                 <LogEntry
                   entry={entry}
+                  skills={skills}
                   onUpdate={onUpdate}
                   onDelete={onDelete}
                 />

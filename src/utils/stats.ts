@@ -38,7 +38,14 @@ export function roundTenth(val: number): number {
 }
 
 export function computeEntryPoints(entry: PushupEntry, skillsMap: Map<string, Skill>): number {
-  const skill = entry.skillId ? skillsMap.get(entry.skillId) : undefined
+  let skill = entry.skillId ? skillsMap.get(entry.skillId) : undefined
+
+  // Fallback: If skillId is missing, match by skillName
+  if (!skill && entry.skillName) {
+    const nameLower = entry.skillName.toLowerCase().trim()
+    skill = Array.from(skillsMap.values()).find(s => s.name.toLowerCase().trim() === nameLower)
+  }
+
   const pointsPerRep = skill?.pointsPerRep && skill.pointsPerRep > 0 ? skill.pointsPerRep : 1
 
   if (skill?.trackingType === 'time' || entry.trackingType === 'time') {

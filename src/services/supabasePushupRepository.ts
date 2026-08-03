@@ -2,6 +2,28 @@ import { supabase } from './supabaseClient'
 import type { PushupRepository } from './pushupRepository'
 import type { CreatePushupEntry, PushupEntry, UpdatePushupEntry } from '../models/PushupEntry'
 
+const SKILL_SHADOW_MAP_KEY = 'calisthenics_entry_skills_map_v1'
+
+function getSkillShadowMap(): Record<string, { skillId?: string; skillName?: string }> {
+  try {
+    const raw = localStorage.getItem(SKILL_SHADOW_MAP_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+function setSkillShadow(id: string, skillId?: string, skillName?: string) {
+  if (!id || (!skillId && !skillName)) return
+  try {
+    const map = getSkillShadowMap()
+    map[id] = { skillId, skillName }
+    localStorage.setItem(SKILL_SHADOW_MAP_KEY, JSON.stringify(map))
+  } catch (e) {
+    console.error('Failed to save skill shadow:', e)
+  }
+}
+
 export class SupabasePushupRepository implements PushupRepository {
   async getAll(): Promise<PushupEntry[]> {
     const { data: { user } } = await supabase.auth.getUser()
@@ -18,15 +40,20 @@ export class SupabasePushupRepository implements PushupRepository {
       throw new Error(error.message || 'Failed to fetch entries')
     }
 
-    return (data || []).map(row => ({
-      id: row.id,
-      amount: row.amount,
-      skillId: row.skill_id || undefined,
-      skillName: row.skill_name || undefined,
-      timestamp: row.timestamp,
-      createdAt: row.created_at,
-      updatedAt: row.created_at,
-    }))
+    const shadowMap = getSkillShadowMap()
+
+    return (data || []).map(row => {
+      const shadow = shadowMap[row.id]
+      return {
+        id: row.id,
+        amount: row.amount,
+        skillId: row.skill_id || shadow?.skillId || undefined,
+        skillName: row.skill_name || shadow?.skillName || undefined,
+        timestamp: row.timestamp,
+        createdAt: row.created_at,
+        updatedAt: row.created_at,
+      }
+    })
   }
 
   async add(entry: CreatePushupEntry): Promise<PushupEntry> {
@@ -69,11 +96,18 @@ export class SupabasePushupRepository implements PushupRepository {
     }
 
     const data = res.data
+    const finalSkillId = data.skill_id || entry.skillId
+    const finalSkillName = data.skill_name || entry.skillName
+
+    if (data.id) {
+      setSkillShadow(data.id, finalSkillId, finalSkillName)
+    }
+
     return {
       id: data.id,
       amount: data.amount,
-      skillId: data.skill_id || entry.skillId,
-      skillName: data.skill_name || entry.skillName,
+      skillId: finalSkillId,
+      skillName: finalSkillName,
       timestamp: data.timestamp,
       createdAt: data.created_at,
       updatedAt: data.created_at,
@@ -96,11 +130,14 @@ export class SupabasePushupRepository implements PushupRepository {
       throw new Error(error.message || 'Failed to update entry')
     }
 
+    const shadowMap = getSkillShadowMap()
+    const shadow = shadowMap[data.id]
+
     return {
       id: data.id,
       amount: data.amount,
-      skillId: data.skill_id || undefined,
-      skillName: data.skill_name || undefined,
+      skillId: data.skill_id || shadow?.skillId || undefined,
+      skillName: data.skill_name || shadow?.skillName || undefined,
       timestamp: data.timestamp,
       createdAt: data.created_at,
       updatedAt: data.created_at,

@@ -1,19 +1,25 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import type { PushupEntry } from '../models/PushupEntry'
+import type { Skill } from '../models/Skill'
 import { formatTime } from '../utils/dates'
+import { computeEntryPoints } from '../utils/stats'
 
 interface LogEntryProps {
   entry: PushupEntry
+  skills?: Skill[]
   onUpdate: (id: string, amount: number) => void
   onDelete: (id: string) => void
 }
 
-export function LogEntry({ entry, onUpdate, onDelete }: LogEntryProps) {
+export function LogEntry({ entry, skills = [], onUpdate, onDelete }: LogEntryProps) {
   const [editing, setEditing] = useState(false)
   const [amount, setAmount] = useState(String(entry.amount))
 
   const isTime = entry.trackingType === 'time'
+
+  const skillsMap = useMemo(() => new Map(skills.map(s => [s.id, s])), [skills])
+  const pointsEarned = useMemo(() => computeEntryPoints(entry, skillsMap), [entry, skillsMap])
 
   const save = () => {
     const parsed = parseInt(amount, 10)
@@ -51,15 +57,20 @@ export function LogEntry({ entry, onUpdate, onDelete }: LogEntryProps) {
             animate={{ scale: 1, opacity: 1 }}
             className="flex flex-col"
           >
-            <span className="text-lg font-bold tabular-nums text-foreground">
-              {entry.amount}
-              <span className="text-xs font-semibold text-accent ml-1">
-                {isTime ? 'sec hold' : 'reps'}
-              </span>{' '}
-              <span className="text-sm font-semibold text-muted">
-                {entry.skillName || 'Push-ups'}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-base sm:text-lg font-bold tabular-nums text-foreground">
+                {entry.amount}
+                <span className="text-xs font-semibold text-accent ml-1">
+                  {isTime ? 'sec hold' : 'reps'}
+                </span>{' '}
+                <span className="text-sm font-semibold text-muted">
+                  {entry.skillName || 'Push-ups'}
+                </span>
               </span>
-            </span>
+              <span className="text-[10px] sm:text-xs font-black text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-full tabular-nums">
+                +{pointsEarned} pts
+              </span>
+            </div>
           </motion.div>
         )}
         <span className="text-xs text-muted/70">{formatTime(entry.timestamp)}</span>
