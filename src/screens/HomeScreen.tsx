@@ -27,7 +27,7 @@ export function HomeScreen({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isTutorialOpen, setIsTutorialOpen] = useState(false)
-  const { unreadCount, markAllAsRead } = useNotifications()
+  const { unreadCount } = useNotifications()
 
   return (
     <div className="flex flex-col h-full px-6 pt-safe relative">
@@ -47,10 +47,7 @@ export function HomeScreen({
         </h1>
         <div className="flex items-center gap-2">
           <button 
-            onClick={() => {
-              setIsNotificationsOpen(true)
-              if (unreadCount > 0) markAllAsRead()
-            }}
+            onClick={() => setIsNotificationsOpen(true)}
             className="text-muted hover:text-foreground transition-colors p-2 relative"
             onPointerDown={e => e.stopPropagation()}
           >

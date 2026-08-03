@@ -10,57 +10,46 @@ export type Notification = {
   created_at: string
 }
 
+const READ_NOTIF_IDS_KEY = 'calisthenics_read_notifications_master_v1'
 const WELCOME_NOTIFICATION_KEY = 'calisthenics_welcome_notif_v1'
 
 const WELCOME_NOTIFICATION_CONTENT =
   'Welcome to Pushups & Calisthenics! 🎯 Tap Settings ⚙️ -> Open App Tutorial & Guide to learn how to navigate the Skill Tree, customize Points Schemes, and use Quick Logging!'
+
+function getSavedReadIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(READ_NOTIF_IDS_KEY)
+    if (raw) return new Set(JSON.parse(raw))
+  } catch (e) {
+    console.error('Failed to read notification state:', e)
+  }
+  return new Set()
+}
+
+function saveReadIds(idsSet: Set<string>) {
+  try {
+    localStorage.setItem(READ_NOTIF_IDS_KEY, JSON.stringify(Array.from(idsSet)))
+  } catch (e) {
+    console.error('Failed to save read notifications:', e)
+  }
+}
 
 export function useNotifications() {
   const { user } = useAuth()
   const [notifications, setNotifications] = useState<Notification[]>([])
 
   const fetchNotifications = useCallback(async () => {
-    if (!user) return
-    const { data } = await supabase
-      .from('notifications')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(50)
+    const readIds = getSavedReadIds()
 
-    if (data) {
-      let list = data as Notification[]
-      // Check if user has a welcome notification; if not, create one!
-      const hasWelcome = list.some((n) => n.type === 'system_welcome')
-      if (!hasWelcome) {
-        const welcomeObj: Notification = {
-          id: `welcome_${user.id}_${Date.now()}`,
-          type: 'system_welcome',
-          content: WELCOME_NOTIFICATION_CONTENT,
-          read: false,
-          created_at: new Date().toISOString(),
-        }
-        list = [welcomeObj, ...list]
-        // Try inserting into Supabase silently if supported
-        void supabase.from('notifications').insert({
-          user_id: user.id,
-          type: 'system_welcome',
-          content: WELCOME_NOTIFICATION_CONTENT,
-          read: false,
-        })
-      }
-      setNotifications(list)
-    }
-  }, [user])
-
-  useEffect(() => {
     if (!user) {
-      // Local/Offline mode fallback welcome notification
+      // Local / guest mode
       try {
         const saved = localStorage.getItem(WELCOME_NOTIFICATION_KEY)
+        let list: Notification[] = []
         if (saved) {
-          setNotifications(JSON.parse(saved))
+          list = JSON.parse(saved)
         } else {
-          const initialWelcome: Notification[] = [
+          list = [
             {
               id: 'welcome_local_1',
               type: 'system_welcome',
@@ -69,16 +58,47 @@ export function useNotifications() {
               created_at: new Date().toISOString(),
             },
           ]
-          localStorage.setItem(WELCOME_NOTIFICATION_KEY, JSON.stringify(initialWelcome))
-          setNotifications(initialWelcome)
         }
+        list = list.map(n => (readIds.has(n.id) ? { ...n, read: true } : n))
+        setNotifications(list)
       } catch (e) {
         console.error('Local notification error:', e)
       }
       return
     }
 
+    // Supabase authenticated mode
+    const { data } = await supabase
+      .from('notifications')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50)
+
+    let list: Notification[] = (data as Notification[]) || []
+
+    // Ensure welcome notification exists
+    const hasWelcome = list.some((n) => n.type === 'system_welcome')
+    if (!hasWelcome) {
+      const welcomeId = `welcome_${user.id}`
+      const welcomeObj: Notification = {
+        id: welcomeId,
+        type: 'system_welcome',
+        content: WELCOME_NOTIFICATION_CONTENT,
+        read: readIds.has(welcomeId),
+        created_at: new Date().toISOString(),
+      }
+      list = [welcomeObj, ...list]
+    }
+
+    // Apply persistent read state
+    list = list.map((n) => (readIds.has(n.id) ? { ...n, read: true } : n))
+    setNotifications(list)
+  }, [user])
+
+  useEffect(() => {
     void fetchNotifications()
+
+    if (!user) return
 
     const channelName = `notifications-${user.id}-${Math.random()}`
     const subscription = supabase
@@ -98,33 +118,33 @@ export function useNotifications() {
   }, [user, fetchNotifications])
 
   const markAsRead = async (id: string) => {
-    if (user) {
+    const readIds = getSavedReadIds()
+    readIds.add(id)
+    saveReadIds(readIds)
+
+    if (user && !id.startsWith('welcome_')) {
       await supabase.from('notifications').update({ read: true }).eq('id', id)
     }
-    setNotifications((prev) => {
-      const next = prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-      if (!user) {
-        try {
-          localStorage.setItem(WELCOME_NOTIFICATION_KEY, JSON.stringify(next))
-        } catch (e) {}
-      }
-      return next
-    })
+
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    )
   }
 
   const markAllAsRead = async () => {
+    const readIds = getSavedReadIds()
+    notifications.forEach((n) => readIds.add(n.id))
+    saveReadIds(readIds)
+
     if (user) {
-      await supabase.from('notifications').update({ read: true }).eq('user_id', user.id).eq('read', false)
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('read', false)
     }
-    setNotifications((prev) => {
-      const next = prev.map((n) => ({ ...n, read: true }))
-      if (!user) {
-        try {
-          localStorage.setItem(WELCOME_NOTIFICATION_KEY, JSON.stringify(next))
-        } catch (e) {}
-      }
-      return next
-    })
+
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length
