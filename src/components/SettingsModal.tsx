@@ -21,7 +21,7 @@ export function SettingsModal({
   onSetRetention,
   onOpenTutorial,
 }: SettingsModalProps) {
-  const { signOut, profile } = useAuth()
+  const { signOut, profile, user } = useAuth()
   const { theme, setTheme } = useAppTheme()
   const [newPassword, setNewPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -30,8 +30,9 @@ export function SettingsModal({
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters')
+    const sanitizedPassword = newPassword.trim()
+    if (sanitizedPassword.length < 8) {
+      setError('Password must be at least 8 characters long.')
       return
     }
 
@@ -39,12 +40,13 @@ export function SettingsModal({
     setError('')
     setMessage('')
 
-    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    // Uses Supabase Auth client parameterized RPC API (immune to SQL injection)
+    const { error } = await supabase.auth.updateUser({ password: sanitizedPassword })
     
     if (error) {
-      setError(error.message)
+      setError(error.message || 'Failed to update password.')
     } else {
-      setMessage('Password updated successfully!')
+      setMessage('🔒 Password updated successfully! Your account is secured.')
       setNewPassword('')
     }
     setLoading(false)
@@ -158,21 +160,27 @@ export function SettingsModal({
                   userId={profile?.id} 
                 />
               </div>
-              <p className="text-sm text-muted mb-2">Profile</p>
-              <div className="bg-background border border-border rounded-xl px-4 py-3 text-sm flex justify-between items-center">
-                <span>@{profile?.username}</span>
-                <button onClick={() => { signOut(); onClose(); }} className="text-xs font-semibold text-red-400">Log Out</button>
+              <p className="text-sm text-muted mb-2">Profile & Security</p>
+              <div className="bg-background border border-border rounded-xl px-4 py-3 text-sm flex justify-between items-center mb-2">
+                <div className="flex flex-col">
+                  <span className="font-semibold text-foreground">@{profile?.username || 'user'}</span>
+                  <span className="text-[10px] text-muted">{user?.email}</span>
+                </div>
+                <button onClick={() => { signOut(); onClose(); }} className="text-xs font-semibold text-red-400 hover:underline">Log Out</button>
               </div>
             </div>
 
-            <form onSubmit={handleUpdatePassword} className="flex flex-col gap-3">
-              <p className="text-sm text-muted mb-1">Change Password</p>
-              {error && <p className="text-xs text-red-400">{error}</p>}
-              {message && <p className="text-xs text-green-400">{message}</p>}
+            <form onSubmit={handleUpdatePassword} className="flex flex-col gap-3 border-t border-border pt-4">
+              <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                <span>🔒</span> Update Password
+              </p>
+              {error && <p className="text-xs font-semibold text-red-400">{error}</p>}
+              {message && <p className="text-xs font-semibold text-emerald-400">{message}</p>}
               <input
                 type="password"
                 required
-                placeholder="New Password"
+                minLength={8}
+                placeholder="New Password (min 8 chars)"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
                 className="bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
@@ -180,7 +188,7 @@ export function SettingsModal({
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 disabled={loading}
-                className="mt-2 bg-accent text-background font-semibold py-3 rounded-xl disabled:opacity-50"
+                className="mt-1 bg-accent text-background font-bold py-3 rounded-xl shadow-lg shadow-accent/20 transition-all disabled:opacity-50"
               >
                 {loading ? 'Updating...' : 'Update Password'}
               </motion.button>

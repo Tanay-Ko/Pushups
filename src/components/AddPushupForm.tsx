@@ -33,7 +33,8 @@ export function AddPushupForm({ skills, onAdd }: AddPushupFormProps) {
   const submit = () => {
     const parsed = parseInt(amount, 10)
     if (!isNaN(parsed) && parsed > 0) {
-      onAdd(parsed, selectedSkill.id, selectedSkill.name)
+      const clamped = Math.min(Math.max(parsed, 1), 999999)
+      onAdd(clamped, selectedSkill.id, selectedSkill.name)
       setAmount('')
     }
   }
@@ -73,9 +74,14 @@ export function AddPushupForm({ skills, onAdd }: AddPushupFormProps) {
           type="number"
           inputMode="numeric"
           min={1}
+          max={999999}
+          maxLength={6}
           placeholder={isTimeSkill ? 'Duration (sec)?' : 'How many reps?'}
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value.replace(/[^0-9]/g, '')
+            setAmount(val.slice(0, 6))
+          }}
           onKeyDown={(e) => e.key === 'Enter' && submit()}
           className="w-[60%] bg-background border border-border rounded-2xl px-4 py-3 text-sm sm:text-base placeholder:text-muted focus:outline-none focus:border-accent transition-colors font-semibold"
         />

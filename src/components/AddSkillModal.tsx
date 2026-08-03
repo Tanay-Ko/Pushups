@@ -60,10 +60,14 @@ export function AddSkillModal({
 
     const finalDomain = domain === 'Custom' ? (customDomain.trim() || 'Custom') : domain
     const parsedPoints = parseFloat(pointsPerRep)
-    const validPoints = !isNaN(parsedPoints) && parsedPoints > 0 ? Math.round(parsedPoints * 10) / 10 : 1
+    const validPoints = !isNaN(parsedPoints) && parsedPoints > 0
+      ? Math.min(Math.max(Math.round(parsedPoints * 10) / 10, 0.1), 10000)
+      : 1
 
     const parsedSeconds = parseInt(timeUnitSeconds, 10)
-    const validSeconds = !isNaN(parsedSeconds) && parsedSeconds > 0 ? parsedSeconds : 1
+    const validSeconds = !isNaN(parsedSeconds) && parsedSeconds > 0
+      ? Math.min(Math.max(parsedSeconds, 1), 86400)
+      : 30
 
     if (editingSkill && onUpdateSkill) {
       onUpdateSkill(editingSkill.id, {

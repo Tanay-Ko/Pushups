@@ -45,7 +45,8 @@ export function QuickLogModal({
     e.preventDefault()
     const parsed = parseInt(amount, 10)
     if (!isNaN(parsed) && parsed > 0) {
-      onAdd(parsed, selectedSkill.id, selectedSkill.name)
+      const clamped = Math.min(Math.max(parsed, 1), 999999)
+      onAdd(clamped, selectedSkill.id, selectedSkill.name)
       setAmount('')
       setShowSuccessToast(true)
       setTimeout(() => {
@@ -58,12 +59,13 @@ export function QuickLogModal({
   const pointsPreview = useMemo(() => {
     const parsed = parseInt(amount, 10)
     if (isNaN(parsed) || parsed <= 0) return 0
+    const clamped = Math.min(Math.max(parsed, 1), 999999)
     const pts = selectedSkill.pointsPerRep || 1
     if (isTime) {
       const unitSecs = selectedSkill.timeUnitSeconds || 1
-      return Math.round((parsed / unitSecs) * pts * 10) / 10
+      return Math.round((clamped / unitSecs) * pts * 10) / 10
     }
-    return Math.round(parsed * pts * 10) / 10
+    return Math.round(clamped * pts * 10) / 10
   }, [amount, selectedSkill, isTime])
 
   return (
@@ -155,11 +157,16 @@ export function QuickLogModal({
                   type="number"
                   inputMode="numeric"
                   min={1}
+                  max={999999}
+                  maxLength={6}
                   required
                   autoFocus
                   placeholder={isTime ? 'e.g. 30 (seconds)' : 'e.g. 15 (reps)'}
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '')
+                    setAmount(val.slice(0, 6))
+                  }}
                   className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-base font-bold tabular-nums text-foreground focus:outline-none focus:border-accent"
                 />
               </div>

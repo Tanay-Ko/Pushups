@@ -24,7 +24,8 @@ export function LogEntry({ entry, skills = [], onUpdate, onDelete }: LogEntryPro
   const save = () => {
     const parsed = parseInt(amount, 10)
     if (!isNaN(parsed) && parsed > 0) {
-      onUpdate(entry.id, parsed)
+      const clamped = Math.min(Math.max(parsed, 1), 999999)
+      onUpdate(entry.id, clamped)
       setEditing(false)
     }
   }
