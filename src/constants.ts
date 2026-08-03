@@ -1,4 +1,4 @@
-export const APP_NAME = 'PUSHUPS'
+export const APP_NAME = 'REPTREE'
 
 export const STORAGE_KEYS = {
   PUSHUP_ENTRIES: 'pushups_entries',

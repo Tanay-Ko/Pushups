@@ -14,7 +14,7 @@ const READ_NOTIF_IDS_KEY = 'calisthenics_read_notifications_master_v1'
 const WELCOME_NOTIFICATION_KEY = 'calisthenics_welcome_notif_v1'
 
 const WELCOME_NOTIFICATION_CONTENT =
-  'Welcome to Pushups & Calisthenics! 🎯 Tap Settings ⚙️ -> Open App Tutorial & Guide to learn how to navigate the Skill Tree, customize Points Schemes, and use Quick Logging!'
+  'Welcome to RepTree! 🎯 Tap Settings ⚙️ -> Open App Tutorial & Guide to learn how to navigate the Skill Tree, customize Points Schemes, and use Quick Logging!'
 
 function getSavedReadIds(): Set<string> {
   try {
