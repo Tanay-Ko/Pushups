@@ -9,11 +9,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['reptree_icon.jpg', 'favicon.svg'],
       manifest: {
-        name: 'PUSHUPS',
-        short_name: 'PUSHUPS',
-        description: 'Track your pushups',
+        name: 'RepTree — Calisthenics Skill Tree',
+        short_name: 'RepTree',
+        description: 'Calisthenics Skill Tree & Workout Points Tracker',
         theme_color: '#0a0a0a',
         background_color: '#0a0a0a',
         display: 'standalone',
@@ -21,15 +21,17 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'favicon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
-            purpose: 'any',
+            src: 'reptree_icon.jpg',
+            sizes: '512x512',
+            type: 'image/jpeg',
+            purpose: 'any maskable',
           },
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        skipWaiting: true,
+        clientsClaim: true,
+        globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff2}'],
       },
     }),
   ],
