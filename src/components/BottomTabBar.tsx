@@ -65,7 +65,7 @@ export function BottomTabBar({ currentScreen, onNavigate }: BottomTabBarProps) {
 
   return (
     <>
-      {/* SVG Definitions for dynamic CSS variable gradients */}
+      {/* SVG gradient definition */}
       <svg width="0" height="0" className="absolute">
         <defs>
           <linearGradient id="activeGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
@@ -75,30 +75,62 @@ export function BottomTabBar({ currentScreen, onNavigate }: BottomTabBarProps) {
         </defs>
       </svg>
 
-      <div className="absolute bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-xl border-t border-border flex justify-around items-end px-2 pb-safe z-50">
+      {/* Carbon & Chrome Tab Bar */}
+      <div
+        className="absolute bottom-0 left-0 right-0 flex justify-around items-end px-1 pb-safe z-50"
+        style={{
+          background: 'rgba(6,6,6,0.97)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 -8px 32px rgba(0,0,0,0.8), 0 -1px 0 rgba(255,255,255,0.04) inset',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
+      >
         {tabs.map(tab => {
           const isActive = currentScreen === tab.id
           return (
             <button
               key={tab.id}
               onClick={() => onNavigate(tab.id)}
-              className="relative flex flex-col items-center justify-center w-16 pt-3 pb-2"
+              className="relative flex flex-col items-center justify-center w-16 pt-3 pb-2 group"
             >
+              {/* Active indicator line above icon */}
+              <motion.div
+                className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] rounded-full"
+                animate={{
+                  width: isActive ? '28px' : '0px',
+                  opacity: isActive ? 1 : 0,
+                }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                style={{
+                  background: 'linear-gradient(to right, var(--theme-gradient-start), var(--theme-gradient-end))',
+                  boxShadow: '0 0 8px var(--theme-glow-strong, rgba(255,255,255,0.3))',
+                }}
+              />
+
+              {/* Icon */}
               <motion.div
                 animate={{
-                  scale: isActive ? 1.1 : 1,
+                  scale: isActive ? 1.12 : 1,
                   y: isActive ? -2 : 0,
                 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                className={isActive ? 'text-accent drop-shadow-md' : 'text-muted'}
+                style={{ color: isActive ? undefined : 'rgba(90,90,90,0.9)' }}
               >
                 {tab.icon(isActive)}
               </motion.div>
-              <span 
-                className={`text-[10px] font-medium mt-1 transition-colors ${isActive ? 'text-accent' : 'text-muted'}`}
+
+              {/* Label */}
+              <motion.span
+                className="text-[10px] font-semibold mt-1"
+                animate={{ opacity: isActive ? 1 : 0.45 }}
+                style={{
+                  color: isActive ? 'var(--theme-accent)' : 'rgba(90,90,90,0.9)',
+                  letterSpacing: '0.04em',
+                }}
               >
                 {tab.label}
-              </span>
+              </motion.span>
             </button>
           )
         })}

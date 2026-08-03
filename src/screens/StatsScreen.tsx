@@ -38,11 +38,21 @@ export function StatsScreen({ entries, skills }: StatsScreenProps) {
   const selectedSkill = skills.find((s) => s.id === filterSkillId)
 
   return (
-    <div className="flex flex-col h-full px-6 pt-safe pb-safe">
+    <div
+      className="flex flex-col h-full px-6 pt-safe pb-safe"
+      style={{
+        background: '#060606',
+        backgroundImage: 'radial-gradient(circle, rgba(40,40,40,0.6) 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+      }}
+    >
       <header className="pt-8 pb-4 flex justify-between items-end shrink-0">
-        <div>
-          <h2 className="text-2xl font-semibold">Stats</h2>
-          <p className="text-sm text-muted mt-0.5">Points & Calisthenics Progress</p>
+        <div className="flex items-center gap-2.5">
+          <div className="w-0.5 h-5 rounded-full" style={{ background: 'linear-gradient(to bottom, var(--theme-gradient-start), var(--theme-gradient-end))' }} />
+          <div>
+            <h2 className="text-2xl font-bold" style={{ color: '#f0f0f0' }}>Stats</h2>
+            <p className="text-sm mt-0.5" style={{ color: 'rgba(120,120,120,0.8)' }}>Points &amp; Calisthenics Progress</p>
+          </div>
         </div>
 
         {/* Top-Right Exercise Filter Dropdown */}
@@ -50,7 +60,12 @@ export function StatsScreen({ entries, skills }: StatsScreenProps) {
           <select
             value={filterSkillId}
             onChange={(e) => setFilterSkillId(e.target.value)}
-            className="bg-surface border border-border/80 rounded-xl px-3 py-1.5 text-xs text-foreground font-semibold focus:outline-none focus:border-accent"
+            className="border rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-accent"
+            style={{
+              background: 'rgba(15,15,15,0.95)',
+              borderColor: 'rgba(255,255,255,0.1)',
+              color: '#c0c0c0',
+            }}
           >
             <option value="all">All Skills (Points)</option>
             {skills.map((s) => (

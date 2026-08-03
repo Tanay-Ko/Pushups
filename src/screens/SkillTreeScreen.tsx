@@ -210,7 +210,14 @@ export function SkillTreeScreen({
   }
 
   return (
-    <div className="flex flex-col h-full px-3 sm:px-4 pt-safe pb-safe relative overflow-hidden">
+    <div
+      className="flex flex-col h-full px-3 sm:px-4 pt-safe pb-safe relative overflow-hidden"
+      style={{
+        background: '#060606',
+        backgroundImage: 'radial-gradient(circle, rgba(40,40,40,0.6) 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+      }}
+    >
       {/* Add / Edit Modal */}
       <AddSkillModal
         isOpen={isAddModalOpen || editingSkill !== null}
@@ -239,9 +246,12 @@ export function SkillTreeScreen({
 
       {/* Screen Header */}
       <header className="pt-4 sm:pt-6 pb-2 flex justify-between items-center z-10 shrink-0">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Skill Tree</h2>
-          <p className="text-[10px] sm:text-xs text-muted mt-0.5">Dynamic Calisthenics Workspace</p>
+        <div className="flex items-center gap-2.5">
+          <div className="w-0.5 h-5 rounded-full" style={{ background: 'linear-gradient(to bottom, var(--theme-gradient-start), var(--theme-gradient-end))' }} />
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight" style={{ color: '#f0f0f0' }}>Skill Tree</h2>
+            <p className="text-[10px] sm:text-xs mt-0.5" style={{ color: 'rgba(100,100,100,0.8)' }}>Dynamic Calisthenics Workspace</p>
+          </div>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* View Mode Toggle */}
@@ -338,9 +348,9 @@ export function SkillTreeScreen({
         <AnimatePresence>
           {selectedSkill && (
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.96 }}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
               className="bg-surface border border-accent/60 rounded-2xl p-3.5 sm:p-4 shadow-2xl relative overflow-hidden"
             >
               <div className="flex justify-between items-start">
@@ -547,7 +557,7 @@ export function SkillTreeScreen({
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={() => setIsQuickLogOpen(true)}
-          className="fixed bottom-26 sm:bottom-28 right-4 sm:right-6 z-40 w-32 sm:w-36 py-3 px-3 bg-accent text-background font-extrabold rounded-full shadow-2xl shadow-accent/40 flex items-center justify-center gap-1.5 border border-white/20"
+          className="fixed bottom-[calc(80px+env(safe-area-inset-bottom)+12px)] right-4 sm:right-6 z-40 w-32 sm:w-36 py-3 px-3 bg-accent text-background font-extrabold rounded-full shadow-2xl shadow-accent/40 flex items-center justify-center gap-1.5 border border-white/20"
         >
           <span className="text-xs sm:text-sm shrink-0">⚡</span>
           <span className="text-[11px] sm:text-xs tracking-wide truncate">Quick Log</span>

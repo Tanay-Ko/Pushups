@@ -43,7 +43,14 @@ export function FriendsScreen() {
   const pendingReceived = friends.filter((f) => f.status === 'pending_received')
 
   return (
-    <div className="flex flex-col h-full px-6 pt-safe pb-safe overflow-y-auto">
+    <div
+      className="flex flex-col h-full px-6 pt-safe pb-safe overflow-y-auto"
+      style={{
+        background: '#060606',
+        backgroundImage: 'radial-gradient(circle, rgba(40,40,40,0.6) 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+      }}
+    >
       {/* Friend Profile Modal */}
       {inspectFriend && (
         <FriendProfileModal
@@ -56,13 +63,21 @@ export function FriendsScreen() {
       )}
 
       <header className="pt-8 pb-6 flex justify-between items-end shrink-0">
-        <div>
-          <h2 className="text-2xl font-semibold">Friends</h2>
-          <p className="text-sm text-muted mt-1">Compete together & inspect points schemes</p>
+        <div className="flex items-center gap-2.5">
+          <div className="w-0.5 h-5 rounded-full" style={{ background: 'linear-gradient(to bottom, var(--theme-gradient-start), var(--theme-gradient-end))' }} />
+          <div>
+            <h2 className="text-2xl font-bold" style={{ color: '#f0f0f0' }}>Friends</h2>
+            <p className="text-sm mt-1" style={{ color: 'rgba(120,120,120,0.8)' }}>Compete together &amp; inspect points schemes</p>
+          </div>
         </div>
         <button
           onClick={signOut}
-          className="text-xs font-medium bg-surface text-muted px-3 py-1.5 rounded-full border border-border"
+          className="text-xs font-semibold px-3 py-1.5 rounded-full"
+          style={{
+            background: 'rgba(15,15,15,0.9)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: 'rgba(160,160,160,0.8)',
+          }}
         >
           Sign Out
         </button>

@@ -63,6 +63,7 @@ function MainApp() {
             todayTotal={stats.todayTotal}
             retention={retention}
             onSetRetention={setRetention}
+            onNavigate={setScreen}
           />
         )
       case 'skills':
@@ -101,8 +102,11 @@ function MainApp() {
   }
 
   return (
-    <div className="h-full w-full bg-black sm:bg-zinc-950 flex justify-center items-center overflow-hidden">
-      <div className="h-full w-full max-w-md bg-background text-foreground relative shadow-2xl sm:h-[90vh] sm:rounded-[2.5rem] overflow-hidden select-none">
+    <div className="h-full w-full bg-[#030303] sm:bg-black flex justify-center items-center overflow-hidden">
+      <div
+        className="h-full w-full max-w-md bg-background text-foreground relative shadow-2xl sm:h-[90vh] sm:rounded-[2.5rem] overflow-hidden select-none"
+        style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 32px 80px rgba(0,0,0,0.9)' }}
+      >
         
         {/* Main Content Area */}
         <div className="relative h-full w-full pb-[calc(80px+env(safe-area-inset-bottom))]">
@@ -129,7 +133,7 @@ function MainApp() {
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
             onClick={() => setIsTutorialOpen(true)}
-            className="fixed bottom-26 sm:bottom-28 left-4 sm:left-6 z-40 w-32 sm:w-36 py-3 px-3 bg-surface border border-accent/60 text-foreground font-extrabold rounded-full shadow-2xl flex items-center justify-center gap-1.5 backdrop-blur-md"
+            className="fixed bottom-[calc(80px+env(safe-area-inset-bottom)+12px)] left-4 sm:left-6 z-40 w-32 sm:w-36 py-3 px-3 bg-surface border border-accent/60 text-foreground font-extrabold rounded-full shadow-2xl flex items-center justify-center gap-1.5 backdrop-blur-md"
           >
             <span className="text-xs sm:text-sm shrink-0">📖</span>
             <span className="text-[11px] sm:text-xs tracking-wide font-bold truncate">App Guide</span>

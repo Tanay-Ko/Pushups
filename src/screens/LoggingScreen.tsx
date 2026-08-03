@@ -43,11 +43,21 @@ export function LoggingScreen({
     : 'All Time'
 
   return (
-    <div className="flex flex-col h-full px-6 pt-safe pb-safe">
+    <div
+      className="flex flex-col h-full px-6 pt-safe pb-safe"
+      style={{
+        background: '#060606',
+        backgroundImage: 'radial-gradient(circle, rgba(40,40,40,0.6) 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+      }}
+    >
       <header className="pt-8 pb-4 flex justify-between items-end">
-        <div>
-          <h2 className="text-2xl font-semibold">Log Workout</h2>
-          <p className="text-sm text-muted mt-0.5">Record reps for any skill in your tree</p>
+        <div className="flex items-center gap-2.5">
+          <div className="w-0.5 h-5 rounded-full" style={{ background: 'linear-gradient(to bottom, var(--theme-gradient-start), var(--theme-gradient-end))' }} />
+          <div>
+            <h2 className="text-2xl font-bold" style={{ color: '#f0f0f0' }}>Log Workout</h2>
+            <p className="text-sm mt-0.5" style={{ color: 'rgba(120,120,120,0.8)' }}>Record reps for any skill in your tree</p>
+          </div>
         </div>
         <span className="text-[10px] font-semibold text-muted bg-surface border border-border px-2.5 py-1 rounded-full">
           Showing: {retentionLabel}
