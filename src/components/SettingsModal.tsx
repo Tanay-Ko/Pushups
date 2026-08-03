@@ -21,12 +21,19 @@ export function SettingsModal({
   onSetRetention,
   onOpenTutorial,
 }: SettingsModalProps) {
-  const { signOut, profile, user } = useAuth()
+  const { signOut, profile, user, isPasswordRecovery, clearPasswordRecovery } = useAuth()
   const { theme, setTheme } = useAppTheme()
   const [newPassword, setNewPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (isPasswordRecovery) {
+      setMessage('🔑 You logged in via Password Reset link! Enter your new password below to update your account.')
+    }
+  }, [isPasswordRecovery])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,14 +47,16 @@ export function SettingsModal({
     setError('')
     setMessage('')
 
-    // Uses Supabase Auth client parameterized RPC API (immune to SQL injection)
     const { error } = await supabase.auth.updateUser({ password: sanitizedPassword })
     
     if (error) {
       setError(error.message || 'Failed to update password.')
     } else {
-      setMessage('🔒 Password updated successfully! Your account is secured.')
+      setMessage('🔒 Password updated successfully! Your account is now secured.')
       setNewPassword('')
+      if (isPasswordRecovery) {
+        clearPasswordRecovery()
+      }
     }
     setLoading(false)
   }
@@ -170,21 +179,44 @@ export function SettingsModal({
               </div>
             </div>
 
+            {/* Change Password Form with 👁️ Password Visibility Toggle */}
             <form onSubmit={handleUpdatePassword} className="flex flex-col gap-3 border-t border-border pt-4">
               <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
                 <span>🔒</span> Update Password
               </p>
               {error && <p className="text-xs font-semibold text-red-400">{error}</p>}
-              {message && <p className="text-xs font-semibold text-emerald-400">{message}</p>}
-              <input
-                type="password"
-                required
-                minLength={8}
-                placeholder="New Password (min 8 chars)"
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
-                className="bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
-              />
+              {message && <p className="text-xs font-semibold text-emerald-400 leading-relaxed">{message}</p>}
+              
+              <div className="relative flex items-center">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={8}
+                  placeholder="New Password (min 8 chars)"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  className="w-full bg-background border border-border rounded-xl pl-4 pr-11 py-3 text-sm focus:outline-none focus:border-accent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 p-1 text-muted hover:text-foreground transition-colors"
+                  title={showPassword ? 'Hide Password' : 'Show Password'}
+                >
+                  {showPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  )}
+                </button>
+              </div>
+
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 disabled={loading}

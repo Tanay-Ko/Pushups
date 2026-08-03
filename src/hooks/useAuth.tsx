@@ -12,6 +12,8 @@ interface AuthContextType {
   user: User | null
   profile: Profile | null
   loading: boolean
+  isPasswordRecovery: boolean
+  clearPasswordRecovery: () => void
   signOut: () => Promise<void>
 }
 
@@ -20,6 +22,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   loading: true,
+  isPasswordRecovery: false,
+  clearPasswordRecovery: () => {},
   signOut: async () => {},
 })
 
@@ -28,23 +32,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
 
   useEffect(() => {
+    // Check if current URL contains recovery hash fragment or type=recovery
+    if (window.location.hash.includes('type=recovery') || window.location.search.includes('type=recovery')) {
+      setIsPasswordRecovery(true)
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchProfile(session.user.id)
+        fetchProfile(session.user.id, session.user.email)
       } else {
         setLoading(false)
       }
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true)
+      }
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchProfile(session.user.id)
+        fetchProfile(session.user.id, session.user.email)
       } else {
         setProfile(null)
         setLoading(false)
@@ -54,32 +67,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, userEmail?: string) => {
     try {
-      const { data, error } = await supabase
+      let { data } = await supabase
         .from('profiles')
         .select('id, username')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
       
-      if (!error && data) {
-        setProfile(data)
-      } else {
-        setProfile(null)
+      if (!data && userEmail) {
+        // Auto-create missing profile row for user
+        const baseUsername = userEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '') || 'user'
+        const defaultUsername = `${baseUsername}_${Math.floor(100 + Math.random() * 900)}`
+        const { data: created } = await supabase
+          .from('profiles')
+          .upsert({ id: userId, username: defaultUsername })
+          .select('id, username')
+          .single()
+        data = created
       }
+
+      setProfile(data || null)
     } catch (e) {
-      console.error(e)
+      console.error('Profile fetch error:', e)
     } finally {
       setLoading(false)
     }
   }
 
+  const clearPasswordRecovery = () => {
+    setIsPasswordRecovery(false)
+  }
+
   const signOut = async () => {
+    setIsPasswordRecovery(false)
     await supabase.auth.signOut()
   }
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signOut }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        user,
+        profile,
+        loading,
+        isPasswordRecovery,
+        clearPasswordRecovery,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
