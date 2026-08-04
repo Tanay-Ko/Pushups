@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-const STORAGE_KEY = 'calisthenics_tutorial_completed_v1'
+const STORAGE_KEY = 'calisthenics_tutorial_completed_v2'
 
 export function useTutorial() {
   const [isTutorialCompleted, setIsTutorialCompleted] = useState<boolean>(() => {
