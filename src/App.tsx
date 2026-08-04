@@ -30,11 +30,12 @@ function MainApp() {
   const { skills, addSkill, updateSkill, deleteSkill, resetToDefaultWorkspace } = useSkills()
   const { retention, setRetention, isWithinRetention } = useLogRetention()
   const { viewMode, setViewMode } = useTreeSettings()
-  const { isTutorialCompleted, completeTutorial, resetTutorial } = useTutorial()
+  const { isTutorialCompleted, completeTutorial } = useTutorial()
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isTutorialOpen, setIsTutorialOpen] = useState(false)
+  const [isInteractiveTutorial, setIsInteractiveTutorial] = useState(true)
 
   const stats = useMemo(() => computeStats(entries, skills), [entries, skills])
 
@@ -214,7 +215,11 @@ function MainApp() {
           retention={retention}
           onSetRetention={setRetention}
           onOpenTutorial={() => {
-            resetTutorial()
+            setIsInteractiveTutorial(true)
+            setIsTutorialOpen(true)
+          }}
+          onOpenReference={() => {
+            setIsInteractiveTutorial(false)
             setIsTutorialOpen(true)
           }}
         />
@@ -228,6 +233,7 @@ function MainApp() {
           isOpen={isTutorialOpen}
           onClose={() => setIsTutorialOpen(false)}
           onFinishTutorial={completeTutorial}
+          isInteractiveFlow={isInteractiveTutorial}
         />
 
       </div>
