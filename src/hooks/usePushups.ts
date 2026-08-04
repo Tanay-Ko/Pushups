@@ -24,12 +24,42 @@ function writeCache(entries: PushupEntry[]): void {
   }
 }
 
+/**
+ * Build the initial visible entries by merging:
+ *   1. The persisted cache (last known Supabase state)
+ *   2. Any pending 'add' ops from the queue that survived an app close while offline
+ *
+ * This prevents offline-added entries from disappearing after close/reopen.
+ */
+function seedEntries(): PushupEntry[] {
+  const cached = readCache()
+  const cachedIds = new Set(cached.map((e) => e.id))
+
+  const pendingAdds: PushupEntry[] = offlineSyncQueue
+    .getAll()
+    .filter((op): op is Extract<typeof op, { type: 'add' }> => op.type === 'add')
+    .filter((op) => !cachedIds.has(op.localId)) // not already in cache
+    .map((op) => ({
+      id: op.localId,
+      amount: op.entry.amount,
+      skillId: op.entry.skillId,
+      skillName: op.entry.skillName,
+      timestamp: op.entry.timestamp ?? new Date().toISOString(),
+      createdAt: op.entry.timestamp ?? new Date().toISOString(),
+      updatedAt: op.entry.timestamp ?? new Date().toISOString(),
+    }))
+
+  return [...pendingAdds, ...cached].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+  )
+}
+
 export function usePushups(userId?: string) {
   const isOnline = useOnlineStatus()
   const isSyncing = useRef(false)
 
-  // Seed state from cache immediately so app feels instant
-  const [entries, setEntries] = useState<PushupEntry[]>(() => readCache())
+  // Seed instantly from cache + pending queue so the UI is never empty on open
+  const [entries, setEntries] = useState<PushupEntry[]>(seedEntries)
   const [loading, setLoading] = useState(true)
   const [pendingCount, setPendingCount] = useState(() => offlineSyncQueue.count())
 
@@ -42,30 +72,27 @@ export function usePushups(userId?: string) {
     writeCache(sorted)
   }, [])
 
-  /** Migrate any pre-auth local entries into Supabase */
-  const migrateLocalData = useCallback(async () => {
-    if (!userId) return
-    try {
-      const localEntries = await localPushupRepository.getAll()
-      if (localEntries.length > 0) {
-        for (const entry of localEntries) {
-          try {
-            await supabasePushupRepository.add({
-              amount: entry.amount,
-              skillId: entry.skillId,
-              skillName: entry.skillName,
-              timestamp: entry.timestamp,
-            })
-            await localPushupRepository.delete(entry.id)
-          } catch (e) {
-            console.error('[Migration] Failed to migrate entry:', e)
-          }
-        }
-      }
-    } catch (e) {
-      console.error('[Migration] Error during migration:', e)
-    }
-  }, [userId])
+  /**
+   * Merge Supabase data with any still-pending offline adds so they
+   * stay visible until the queue is flushed.
+   */
+  const mergeWithPending = useCallback((remote: PushupEntry[]): PushupEntry[] => {
+    const remoteIds = new Set(remote.map((e) => e.id))
+    const pendingAdds: PushupEntry[] = offlineSyncQueue
+      .getAll()
+      .filter((op): op is Extract<typeof op, { type: 'add' }> => op.type === 'add')
+      .filter((op) => !remoteIds.has(op.localId))
+      .map((op) => ({
+        id: op.localId,
+        amount: op.entry.amount,
+        skillId: op.entry.skillId,
+        skillName: op.entry.skillName,
+        timestamp: op.entry.timestamp ?? new Date().toISOString(),
+        createdAt: op.entry.timestamp ?? new Date().toISOString(),
+        updatedAt: op.entry.timestamp ?? new Date().toISOString(),
+      }))
+    return [...pendingAdds, ...remote]
+  }, [])
 
   /** Flush offline queue to Supabase */
   const flushSyncQueue = useCallback(async () => {
@@ -76,33 +103,34 @@ export function usePushups(userId?: string) {
     isSyncing.current = true
     console.log(`[Sync] Flushing ${queue.length} offline operation(s)…`)
 
-    // Process in order, removing each op as it succeeds
     let i = 0
     while (i < offlineSyncQueue.getAll().length) {
       const op = offlineSyncQueue.getAll()[i]
       try {
         if (op.type === 'add') {
           const remote = await supabasePushupRepository.add(op.entry)
-          // Replace the temp local-id entry in cache with the real one
+          // Replace temp-id entry in cache with the real Supabase one
           const cached = readCache()
           const idx = cached.findIndex((e) => e.id === op.localId)
           if (idx !== -1) {
             cached[idx] = remote
-            writeCache(cached)
-            setEntries([...cached].sort(
-              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-            ))
+          } else {
+            cached.unshift(remote)
           }
+          writeCache(cached)
+          setEntries([...cached].sort(
+            (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+          ))
         } else if (op.type === 'update') {
           await supabasePushupRepository.update(op.id, op.updates)
         } else if (op.type === 'delete') {
           await supabasePushupRepository.delete(op.id)
         }
         offlineSyncQueue.dequeue(i)
-        // Don't increment i — after dequeue the next item slides into position i
+        // After dequeue, next item slides into index i — don't increment
       } catch (e) {
         console.error('[Sync] Failed to sync op, will retry later:', op, e)
-        i++ // Skip this one for now, try next
+        i++
       }
     }
 
@@ -110,102 +138,126 @@ export function usePushups(userId?: string) {
     isSyncing.current = false
   }, [userId])
 
-  /** Silent background sync — doesn't show loading spinner, keeps cached data visible */
+  /** Silent background sync — no spinner, keeps cached data visible */
   const backgroundRefresh = useCallback(async () => {
     if (!userId) return
     try {
       await flushSyncQueue()
       const data = await supabasePushupRepository.getAll()
-      applyAndCache(data)
+      applyAndCache(mergeWithPending(data))
     } catch (e) {
-      // Offline or Supabase unavailable — silently stay on cache
       console.debug('[Pushups] Background refresh skipped (offline):', e)
     }
-  }, [userId, flushSyncQueue, applyAndCache])
+  }, [userId, flushSyncQueue, applyAndCache, mergeWithPending])
 
-  /** Full refresh from Supabase, update cache */
+  /** Full refresh from Supabase */
   const refresh = useCallback(async () => {
     setLoading(true)
     try {
       if (userId) {
-        await migrateLocalData()
+        // Flush any pending ops first, then fetch the canonical state
         await flushSyncQueue()
         const data = await supabasePushupRepository.getAll()
-        applyAndCache(data)
+        applyAndCache(mergeWithPending(data))
       } else {
+        // Guest mode — use local repository only (no Supabase involved)
         const data = await localPushupRepository.getAll()
         applyAndCache(data)
       }
     } catch (e) {
       console.warn('[Pushups] Supabase unavailable, serving from cache:', e)
-      // Cache is already in state from useState initialiser — nothing to do
+      // Cache + pending entries already in state from seedEntries()
     } finally {
       setLoading(false)
     }
-  }, [userId, migrateLocalData, flushSyncQueue, applyAndCache])
+  }, [userId, flushSyncQueue, applyAndCache, mergeWithPending])
 
   // Initial load
   useEffect(() => {
     void refresh()
   }, [refresh])
 
-  // When device comes back online → flush queue then refresh
+  // When device comes back online → flush queue then quietly refresh
   useEffect(() => {
     if (isOnline && userId) {
       void flushSyncQueue().then(() => {
-        // Do a quiet background refresh to pull in any changes from other devices
         supabasePushupRepository.getAll()
-          .then((data) => applyAndCache(data))
-          .catch(() => {/* stay on cache */})
+          .then((data) => applyAndCache(mergeWithPending(data)))
+          .catch(() => { /* stay on cache */ })
       })
     }
-  }, [isOnline, userId, flushSyncQueue, applyAndCache])
+  }, [isOnline, userId, flushSyncQueue, applyAndCache, mergeWithPending])
 
-  /** Add — writes to cache instantly, queues Supabase sync */
+  /**
+   * Add — optimistic cache write ONLY (no localPushupRepository for logged-in users).
+   * For logged-in users, localPushupRepository is only used as a guest fallback.
+   * Using it for logged-in adds was causing duplicates via migrateLocalData on reopen.
+   */
   const add = useCallback(
     async (entry: CreatePushupEntry): Promise<void> => {
-      // 1. Write to local cache immediately (optimistic)
-      const localEntry = await localPushupRepository.add(entry)
-      const cached = readCache()
-      applyAndCache([localEntry, ...cached])
+      const now = new Date().toISOString()
 
-      if (!userId) return // guest mode — local only
+      if (!userId) {
+        // Guest mode: write to local repo and cache
+        const localEntry = await localPushupRepository.add(entry)
+        applyAndCache([localEntry, ...readCache()])
+        return
+      }
+
+      // Logged-in: create a temp entry in-memory only
+      const tempId = `pending_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+      const tempEntry: PushupEntry = {
+        id: tempId,
+        amount: entry.amount,
+        skillId: entry.skillId,
+        skillName: entry.skillName,
+        timestamp: entry.timestamp ?? now,
+        createdAt: now,
+        updatedAt: now,
+      }
+      applyAndCache([tempEntry, ...readCache()])
 
       if (isOnline) {
-        // 2a. Online: push to Supabase, replace temp entry with real one
         try {
           const remote = await supabasePushupRepository.add({
             ...entry,
-            timestamp: localEntry.timestamp,
+            timestamp: tempEntry.timestamp,
           })
+          // Swap temp for real
           const current = readCache()
-          const idx = current.findIndex((e) => e.id === localEntry.id)
+          const idx = current.findIndex((e) => e.id === tempId)
           if (idx !== -1) current[idx] = remote
           applyAndCache(current)
-          // Remove from local fallback store
-          await localPushupRepository.delete(localEntry.id).catch(() => {})
         } catch (e) {
-          console.warn('[Pushups] Add failed online, queuing for later sync:', e)
-          offlineSyncQueue.enqueue({ type: 'add', localId: localEntry.id, entry: { ...entry, timestamp: localEntry.timestamp } })
+          console.warn('[Pushups] Add failed while online, queuing:', e)
+          offlineSyncQueue.enqueue({
+            type: 'add',
+            localId: tempId,
+            entry: { ...entry, timestamp: tempEntry.timestamp },
+          })
           setPendingCount(offlineSyncQueue.count())
         }
       } else {
-        // 2b. Offline: enqueue for later
-        offlineSyncQueue.enqueue({ type: 'add', localId: localEntry.id, entry: { ...entry, timestamp: localEntry.timestamp } })
+        // Offline: queue it — temp entry stays in cache until flushed
+        offlineSyncQueue.enqueue({
+          type: 'add',
+          localId: tempId,
+          entry: { ...entry, timestamp: tempEntry.timestamp },
+        })
         setPendingCount(offlineSyncQueue.count())
       }
     },
     [userId, isOnline, applyAndCache],
   )
 
-  /** Update — optimistic local update + Supabase sync */
+  /** Update — optimistic cache update + Supabase sync */
   const update = useCallback(
     async (id: string, updates: UpdatePushupEntry): Promise<void> => {
-      // Optimistic update in cache
-      const cached = readCache().map((e) =>
-        e.id === id ? { ...e, ...updates, updatedAt: new Date().toISOString() } : e,
+      applyAndCache(
+        readCache().map((e) =>
+          e.id === id ? { ...e, ...updates, updatedAt: new Date().toISOString() } : e,
+        ),
       )
-      applyAndCache(cached)
 
       if (!userId) {
         await localPushupRepository.update(id, updates).catch(console.error)
@@ -216,7 +268,7 @@ export function usePushups(userId?: string) {
         try {
           await supabasePushupRepository.update(id, updates)
         } catch (e) {
-          console.warn('[Pushups] Update failed online, queuing:', e)
+          console.warn('[Pushups] Update failed, queuing:', e)
           offlineSyncQueue.enqueue({ type: 'update', id, updates })
           setPendingCount(offlineSyncQueue.count())
         }
@@ -228,10 +280,9 @@ export function usePushups(userId?: string) {
     [userId, isOnline, applyAndCache],
   )
 
-  /** Delete — optimistic local removal + Supabase sync */
+  /** Delete — remove from cache immediately, sync to Supabase */
   const remove = useCallback(
     async (id: string): Promise<void> => {
-      // Optimistic removal
       applyAndCache(readCache().filter((e) => e.id !== id))
 
       if (!userId) {
@@ -239,11 +290,14 @@ export function usePushups(userId?: string) {
         return
       }
 
+      // Also cancel any pending 'add' op for this id (offline add + offline delete = no-op)
+      // offlineSyncQueue already handles this collapse internally
+
       if (isOnline) {
         try {
           await supabasePushupRepository.delete(id)
         } catch (e) {
-          console.warn('[Pushups] Delete failed online, queuing:', e)
+          console.warn('[Pushups] Delete failed, queuing:', e)
           offlineSyncQueue.enqueue({ type: 'delete', id })
           setPendingCount(offlineSyncQueue.count())
         }

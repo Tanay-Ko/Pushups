@@ -172,9 +172,6 @@ function MainApp() {
         style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 32px 80px rgba(0,0,0,0.9)' }}
       >
         
-        {/* Offline / Sync Banner */}
-        <OfflineIndicator isOnline={isOnline} pendingCount={pendingCount} />
-
         {/* Main Content Area */}
         <div className="relative h-full w-full pb-[calc(80px+env(safe-area-inset-bottom))]">
           <AnimatePresence mode="wait">
@@ -190,6 +187,9 @@ function MainApp() {
             </motion.div>
           </AnimatePresence>
         </div>
+
+        {/* Offline / Sync Banner — sits above the tab bar, clear of Dynamic Island */}
+        <OfflineIndicator isOnline={isOnline} pendingCount={pendingCount} />
 
         {/* Persistent Bottom Tab Bar */}
         <BottomTabBar currentScreen={screen} onNavigate={setScreen} />
