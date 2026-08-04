@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useAppTheme, type ThemeName } from '../hooks/useTheme'
 
 import type { LogRetentionOption } from '../hooks/useLogRetention'
+import { APP_VERSION, APP_BUILD_DATE } from '../version'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -225,6 +226,15 @@ export function SettingsModal({
                 {loading ? 'Updating...' : 'Update Password'}
               </motion.button>
             </form>
+
+            {/* Version Footer */}
+            <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted/50">RepTree</span>
+              <div className="text-right">
+                <span className="text-[10px] font-bold text-muted/60">v{APP_VERSION}</span>
+                <span className="block text-[9px] text-muted/40">{APP_BUILD_DATE}</span>
+              </div>
+            </div>
 
           </motion.div>
         </motion.div>
