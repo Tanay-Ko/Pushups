@@ -30,7 +30,7 @@ function MainApp() {
   const { skills, addSkill, updateSkill, deleteSkill, resetToDefaultWorkspace } = useSkills()
   const { retention, setRetention, isWithinRetention } = useLogRetention()
   const { viewMode, setViewMode } = useTreeSettings()
-  const { isTutorialCompleted, completeTutorial, resetTutorial } = useTutorial()
+  const { isTutorialCompleted, completeTutorial, resetTutorial } = useTutorial(user?.id)
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
