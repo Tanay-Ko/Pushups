@@ -110,6 +110,19 @@ export function usePushups(userId?: string) {
     isSyncing.current = false
   }, [userId])
 
+  /** Silent background sync — doesn't show loading spinner, keeps cached data visible */
+  const backgroundRefresh = useCallback(async () => {
+    if (!userId) return
+    try {
+      await flushSyncQueue()
+      const data = await supabasePushupRepository.getAll()
+      applyAndCache(data)
+    } catch (e) {
+      // Offline or Supabase unavailable — silently stay on cache
+      console.debug('[Pushups] Background refresh skipped (offline):', e)
+    }
+  }, [userId, flushSyncQueue, applyAndCache])
+
   /** Full refresh from Supabase, update cache */
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -242,5 +255,5 @@ export function usePushups(userId?: string) {
     [userId, isOnline, applyAndCache],
   )
 
-  return { entries, loading, add, update, remove, refresh, isOnline, pendingCount }
+  return { entries, loading, add, update, remove, refresh, backgroundRefresh, isOnline, pendingCount }
 }

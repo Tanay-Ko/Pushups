@@ -6,6 +6,7 @@ import { useSkills } from './hooks/useSkills'
 import { useLogRetention } from './hooks/useLogRetention'
 import { useTreeSettings } from './hooks/useTreeSettings'
 import { useTutorial } from './hooks/useTutorial'
+import { useBackgroundRefresh } from './hooks/useBackgroundRefresh'
 import { computeStats } from './utils/stats'
 import { HomeScreen } from './screens/HomeScreen'
 import { LoggingScreen } from './screens/LoggingScreen'
@@ -23,9 +24,9 @@ import { OfflineIndicator } from './components/OfflineIndicator'
 
 function MainApp() {
   useAppTheme() // Initialize theme class on document element
-  const { user, profile, loading: authLoading } = useAuth()
+  const { user, profile, loading: authLoading, isOffline: authIsOffline } = useAuth()
   const [screen, setScreen] = useState<Screen>('home')
-  const { entries, add, update, remove, loading: dataLoading, isOnline, pendingCount } = usePushups(user?.id)
+  const { entries, add, update, remove, backgroundRefresh, isOnline, pendingCount } = usePushups(user?.id)
   const { skills, addSkill, updateSkill, deleteSkill, resetToDefaultWorkspace } = useSkills()
   const { retention, setRetention, isWithinRetention } = useLogRetention()
   const { viewMode, setViewMode } = useTreeSettings()
@@ -37,7 +38,12 @@ function MainApp() {
 
   const stats = useMemo(() => computeStats(entries, skills), [entries, skills])
 
-  if (authLoading || (user && profile && dataLoading)) {
+  // Silent background sync when app returns to foreground or device reconnects
+  useBackgroundRefresh(backgroundRefresh, !!user?.id)
+
+  // Only show a spinner on very first auth check (before we know if the user is logged in).
+  // dataLoading is suppressed because usePushups seeds state from localStorage cache instantly.
+  if (authLoading) {
     return (
       <div className="h-full w-full bg-background flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
@@ -45,12 +51,27 @@ function MainApp() {
     )
   }
 
+  // Least-privilege offline gate:
+  // If no user at all (no cache, never signed in on this device) → show login even offline.
+  // If user exists but no profile and we ARE online → show CreateProfileScreen.
+  // If user exists but no profile and we are OFFLINE → something went wrong with cache;
+  //   still block the app but DON'T demand profile creation they can't complete.
   if (!user) {
     return <AuthScreen />
   }
 
-  if (!profile) {
+  if (!profile && !authIsOffline) {
     return <CreateProfileScreen />
+  }
+
+  if (!profile && authIsOffline) {
+    // Rare: has cached user ID but no cached profile — show a simple waiting screen
+    return (
+      <div className="h-full w-full bg-background flex flex-col items-center justify-center gap-3 px-8 text-center">
+        <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+        <p className="text-sm text-muted">You're offline. Connect to the internet to finish setting up your account.</p>
+      </div>
+    )
   }
 
   const renderScreen = () => {
