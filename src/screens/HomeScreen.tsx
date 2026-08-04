@@ -4,6 +4,7 @@ import { SettingsModal } from '../components/SettingsModal'
 import { NotificationsModal } from '../components/NotificationsModal'
 import { TutorialModal } from '../components/TutorialModal'
 import { APP_NAME } from '../constants'
+import { APP_VERSION } from '../version'
 import { formatDate } from '../utils/dates'
 import { useNotifications } from '../hooks/useNotifications'
 import type { LogRetentionOption } from '../hooks/useLogRetention'
@@ -71,6 +72,16 @@ export function HomeScreen({
           >
             {APP_NAME}
           </h1>
+          <span
+            className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border"
+            style={{
+              borderColor: 'rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'var(--theme-text, rgba(255,255,255,0.7))',
+            }}
+          >
+            v{APP_VERSION}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <button
