@@ -89,21 +89,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const init = async () => {
+      // If offline at startup, skip Supabase entirely — go straight to cache
+      if (!navigator.onLine) {
+        console.log('[Auth] Offline at startup — restoring from cache')
+        restoreFromCache()
+        return
+      }
+
+      // Safety timeout: if Supabase takes longer than 4s, fall back to cache
+      const timeout = setTimeout(() => {
+        console.warn('[Auth] getSession timeout — falling back to cache')
+        restoreFromCache()
+      }, 4000)
+
       try {
         const { data: { session } } = await supabase.auth.getSession()
+        clearTimeout(timeout)
         setSession(session)
         setUser(session?.user ?? null)
 
         if (session?.user) {
           await fetchProfile(session.user.id, session.user.email)
         } else if (!navigator.onLine) {
-          // Offline and Supabase returned nothing — try cached session
           restoreFromCache()
         } else {
           setLoading(false)
         }
       } catch (e) {
-        console.warn('[Auth] getSession failed (offline?), restoring from cache:', e)
+        clearTimeout(timeout)
+        console.warn('[Auth] getSession failed (offline?) — restoring from cache:', e)
         restoreFromCache()
       }
     }

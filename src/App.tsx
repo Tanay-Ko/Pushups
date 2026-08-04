@@ -41,12 +41,54 @@ function MainApp() {
   // Silent background sync when app returns to foreground or device reconnects
   useBackgroundRefresh(backgroundRefresh, !!user?.id)
 
-  // Only show a spinner on very first auth check (before we know if the user is logged in).
-  // dataLoading is suppressed because usePushups seeds state from localStorage cache instantly.
+  // Only show loading screen on very first auth check
   if (authLoading) {
+    const offline = !navigator.onLine
     return (
-      <div className="h-full w-full bg-background flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+      <div
+        className="h-full w-full flex flex-col items-center justify-center gap-5 px-10 text-center"
+        style={{
+          background: '#060606',
+          backgroundImage: 'radial-gradient(circle, rgba(40,40,40,0.6) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+        }}
+      >
+        {offline ? (
+          <>
+            {/* Offline icon */}
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center"
+              style={{
+                background: 'rgba(239,68,68,0.1)',
+                border: '1px solid rgba(239,68,68,0.25)',
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="1" y1="1" x2="23" y2="23" />
+                <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
+                <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
+                <path d="M10.71 5.05A16 16 0 0 1 22.56 9" />
+                <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                <line x1="12" y1="20" x2="12.01" y2="20" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-base font-bold mb-1" style={{ color: '#f0f0f0' }}>
+                You're offline
+              </p>
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(140,140,140,0.9)' }}>
+                Connect to the internet to sign in or create an account.
+              </p>
+            </div>
+            <p className="text-xs" style={{ color: 'rgba(90,90,90,0.8)' }}>
+              Already signed in? The app will load automatically once you're connected.
+            </p>
+          </>
+        ) : (
+          /* Online but still initialising */
+          <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+        )}
       </div>
     )
   }
