@@ -19,12 +19,13 @@ import { useAppTheme } from './hooks/useTheme'
 import { SettingsModal } from './components/SettingsModal'
 import { NotificationsModal } from './components/NotificationsModal'
 import { TutorialModal } from './components/TutorialModal'
+import { OfflineIndicator } from './components/OfflineIndicator'
 
 function MainApp() {
   useAppTheme() // Initialize theme class on document element
   const { user, profile, loading: authLoading } = useAuth()
   const [screen, setScreen] = useState<Screen>('home')
-  const { entries, add, update, remove, loading: dataLoading } = usePushups(user?.id)
+  const { entries, add, update, remove, loading: dataLoading, isOnline, pendingCount } = usePushups(user?.id)
   const { skills, addSkill, updateSkill, deleteSkill, resetToDefaultWorkspace } = useSkills()
   const { retention, setRetention, isWithinRetention } = useLogRetention()
   const { viewMode, setViewMode } = useTreeSettings()
@@ -108,6 +109,9 @@ function MainApp() {
         style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 32px 80px rgba(0,0,0,0.9)' }}
       >
         
+        {/* Offline / Sync Banner */}
+        <OfflineIndicator isOnline={isOnline} pendingCount={pendingCount} />
+
         {/* Main Content Area */}
         <div className="relative h-full w-full pb-[calc(80px+env(safe-area-inset-bottom))]">
           <AnimatePresence mode="wait">
