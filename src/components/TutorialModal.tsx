@@ -217,9 +217,14 @@ export function TutorialModal({
   const isFirst = currentStep === 0
   const isLast = currentStep === steps.length - 1
 
+  const handleClose = () => {
+    // Simply close the modal — NEVER mark tutorial as completed when exiting/closing
+    onClose()
+  }
+
   const handleFinish = () => {
-    // Only mark initial onboarding tutorial as completed if doing the interactive first-time flow
-    if (onFinishTutorial && isInteractiveFlow) {
+    // ONLY mark tutorial as completed when user explicitly taps 'Complete Tour'
+    if (onFinishTutorial) {
       onFinishTutorial()
     }
     onClose()
@@ -232,7 +237,7 @@ export function TutorialModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={handleClose}
       >
         <motion.div
           className="w-full max-w-md bg-surface border border-accent/40 rounded-3xl p-6 shadow-2xl overflow-hidden relative flex flex-col min-h-[460px] max-h-[90vh]"
@@ -263,7 +268,7 @@ export function TutorialModal({
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-1.5 text-muted hover:text-foreground rounded-full hover:bg-white/5 transition-colors"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
