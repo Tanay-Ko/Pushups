@@ -13,7 +13,6 @@ interface SettingsModalProps {
   retention?: LogRetentionOption
   onSetRetention?: (retention: LogRetentionOption) => void
   onOpenTutorial?: () => void
-  onOpenReference?: () => void
 }
 
 export function SettingsModal({
@@ -22,7 +21,6 @@ export function SettingsModal({
   retention,
   onSetRetention,
   onOpenTutorial,
-  onOpenReference,
 }: SettingsModalProps) {
   const { signOut, profile, user, isPasswordRecovery, clearPasswordRecovery } = useAuth()
   const { theme, setTheme } = useAppTheme()
@@ -97,40 +95,24 @@ export function SettingsModal({
               </button>
             </div>
 
-            {/* App Guides */}
-            <div className="mb-6 space-y-2">
-              <p className="text-sm text-muted">App Guides & Tutorials</p>
-              <div className="grid grid-cols-2 gap-2">
-                {onOpenReference && (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      onClose()
-                      onOpenReference()
-                    }}
-                    className="py-2.5 px-2 rounded-xl bg-surface border border-border text-foreground font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-white/5"
-                  >
-                    <span>📖</span>
-                    <span>Quick Guide</span>
-                  </motion.button>
-                )}
-                {onOpenTutorial && (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      onClose()
-                      onOpenTutorial()
-                    }}
-                    className="py-2.5 px-2 rounded-xl bg-accent text-background font-extrabold text-xs shadow-md shadow-accent/20 flex items-center justify-center gap-1.5"
-                  >
-                    <span>🚀</span>
-                    <span>Full Tour</span>
-                  </motion.button>
-                )}
+            {/* Prominent App Tutorial Button */}
+            {onOpenTutorial && (
+              <div className="mb-6">
+                <p className="text-sm text-muted mb-1.5">Interactive App Tour</p>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => {
+                    onClose()
+                    onOpenTutorial()
+                  }}
+                  className="w-full py-3 rounded-2xl bg-accent text-background font-extrabold text-xs shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
+                >
+                  <span>🚀</span>
+                  <span>Open Interactive App Tutorial</span>
+                </motion.button>
               </div>
-            </div>
+            )}
 
             <div className="mb-6">
               <p className="text-sm text-muted mb-2">Theme</p>

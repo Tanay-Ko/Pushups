@@ -35,7 +35,6 @@ function MainApp() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isTutorialOpen, setIsTutorialOpen] = useState(false)
-  const [isInteractiveTutorial, setIsInteractiveTutorial] = useState(true)
 
   const stats = useMemo(() => computeStats(entries, skills), [entries, skills])
 
@@ -216,11 +215,6 @@ function MainApp() {
           onSetRetention={setRetention}
           onOpenTutorial={() => {
             resetTutorial()
-            setIsInteractiveTutorial(true)
-            setIsTutorialOpen(true)
-          }}
-          onOpenReference={() => {
-            setIsInteractiveTutorial(false)
             setIsTutorialOpen(true)
           }}
         />
@@ -234,7 +228,6 @@ function MainApp() {
           isOpen={isTutorialOpen}
           onClose={() => setIsTutorialOpen(false)}
           onFinishTutorial={completeTutorial}
-          isInteractiveFlow={isInteractiveTutorial}
         />
 
       </div>

@@ -5,11 +5,10 @@ interface TutorialModalProps {
   isOpen: boolean
   onClose: () => void
   onFinishTutorial?: () => void
-  isInteractiveFlow?: boolean // If true, running first-time full 2-min interactive guided tour
 }
 
 // ----------------------------------------------------
-// 1. FULL INTERACTIVE 2-MINUTE ONBOARDING GUIDED TOUR
+// INTERACTIVE 2-MINUTE ONBOARDING GUIDED TOUR
 // ----------------------------------------------------
 const INTERACTIVE_STEPS = [
   {
@@ -18,7 +17,6 @@ const INTERACTIVE_STEPS = [
     subtitle: 'The secret to progressive overload & visible results at home',
     icon: '🔥',
     badge: '2-Min Onboarding',
-    pointerTarget: 'bottom-tabs',
     pointerText: 'Explore your navigation bar below',
     content: (
       <div className="space-y-3.5 text-xs text-muted leading-relaxed">
@@ -47,7 +45,6 @@ const INTERACTIVE_STEPS = [
     subtitle: 'How reps and isometric holds become RPG progression points',
     icon: '⚖️',
     badge: 'Core Concept',
-    pointerTarget: 'quick-log-btn',
     pointerText: 'Log sets instantly from anywhere using ⚡ Quick Log',
     content: (
       <div className="space-y-3 text-xs text-muted leading-relaxed">
@@ -82,7 +79,6 @@ const INTERACTIVE_STEPS = [
     subtitle: '5 movement domains & infinite progression pathways',
     icon: '🌳',
     badge: 'Skill Tree',
-    pointerTarget: 'tree-tab',
     pointerText: 'Tap Tree tab to map your progression',
     content: (
       <div className="space-y-3 text-xs text-muted leading-relaxed">
@@ -115,7 +111,6 @@ const INTERACTIVE_STEPS = [
     subtitle: 'Zero friction logging during workouts',
     icon: '⚡',
     badge: 'Fast Logging',
-    pointerTarget: 'quick-log-btn',
     pointerText: 'Look for the floating ⚡ button at bottom right',
     content: (
       <div className="space-y-3 text-xs text-muted leading-relaxed">
@@ -145,8 +140,7 @@ const INTERACTIVE_STEPS = [
     subtitle: 'Log anywhere with or without internet connection',
     icon: '🛡️',
     badge: 'Offline-First',
-    pointerTarget: 'settings-gear',
-    pointerText: 'Access Settings & Reference Guide anytime',
+    pointerText: 'Access Settings & Re-run Tour anytime',
     content: (
       <div className="space-y-3 text-xs text-muted leading-relaxed">
         <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
@@ -156,47 +150,8 @@ const INTERACTIVE_STEPS = [
           </span>
         </div>
         <p className="text-[11px] text-muted">
-          Need a quick refresher later? Open <strong className="text-foreground">Settings ⚙️ &rarr; Quick Reference Guide</strong> anytime without resetting your data!
+          Need a quick refresher later? Open <strong className="text-foreground">Settings ⚙️ &rarr; Open Interactive Tutorial</strong> anytime!
         </p>
-      </div>
-    ),
-  },
-]
-
-// ----------------------------------------------------
-// 2. CONCISE QUICK REFERENCE GUIDE (FOR SETTINGS MODAL)
-// ----------------------------------------------------
-const REFERENCE_STEPS = [
-  {
-    step: 1,
-    title: 'RepTree Quick Reference 📖',
-    subtitle: 'Core concepts & tracking rules at a glance',
-    icon: '⚡',
-    content: (
-      <div className="space-y-3 text-xs text-muted leading-relaxed">
-        <div className="p-3 rounded-xl bg-surface border border-border space-y-1">
-          <span className="font-bold text-foreground block">🎯 Why Track Bodyweight?</span>
-          <span>Progressive overload is key. Adding 1 rep or 5 seconds hold is how bodyweight strength is built.</span>
-        </div>
-        <div className="p-3 rounded-xl bg-surface border border-border space-y-1">
-          <span className="font-bold text-foreground block">⚖️ Reps vs Isometric Holds</span>
-          <span>Dynamic moves (Pushups) use reps. Static moves (Planks) use seconds. Both award difficulty points.</span>
-        </div>
-      </div>
-    ),
-  },
-  {
-    step: 2,
-    title: 'Skill Tree & Navigation 🌿',
-    subtitle: 'Domains, custom skills & floating tools',
-    icon: '🌳',
-    content: (
-      <div className="space-y-3 text-xs text-muted leading-relaxed">
-        <ul className="list-disc list-inside space-y-2 text-xs text-muted">
-          <li><strong className="text-amber-400">Push</strong>, <strong className="text-sky-400">Pull</strong>, <strong className="text-emerald-400">Core</strong>, <strong className="text-rose-400">Legs</strong>, <strong className="text-purple-400">Skill</strong> domains.</li>
-          <li><strong className="text-foreground">⚡ Floating Quick Log:</strong> Tap floating button at bottom right to log sets without switching tabs.</li>
-          <li><strong className="text-foreground">Offline Logging:</strong> Workouts logged offline queue automatically and sync when reconnected.</li>
-        </ul>
       </div>
     ),
   },
@@ -206,24 +161,20 @@ export function TutorialModal({
   isOpen,
   onClose,
   onFinishTutorial,
-  isInteractiveFlow = true,
 }: TutorialModalProps) {
   const [currentStep, setCurrentStep] = useState(0)
 
   if (!isOpen) return null
 
-  const steps = isInteractiveFlow ? INTERACTIVE_STEPS : REFERENCE_STEPS
-  const stepData = steps[currentStep] || steps[0]
+  const stepData = INTERACTIVE_STEPS[currentStep] || INTERACTIVE_STEPS[0]
   const isFirst = currentStep === 0
-  const isLast = currentStep === steps.length - 1
+  const isLast = currentStep === INTERACTIVE_STEPS.length - 1
 
   const handleClose = () => {
-    // Simply close the modal — NEVER mark tutorial as completed when exiting/closing
     onClose()
   }
 
   const handleFinish = () => {
-    // ONLY mark tutorial as completed when user explicitly taps 'Complete Tour'
     if (onFinishTutorial) {
       onFinishTutorial()
     }
@@ -256,13 +207,11 @@ export function TutorialModal({
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-accent">
-                    Step {stepData.step} of {steps.length}
+                    Step {stepData.step} of {INTERACTIVE_STEPS.length}
                   </span>
-                  {'badge' in stepData && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-muted">
-                      {(stepData as any).badge}
-                    </span>
-                  )}
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-muted">
+                    {stepData.badge}
+                  </span>
                 </div>
                 <h3 className="text-base font-bold text-foreground leading-tight">{stepData.title}</h3>
               </div>
@@ -280,7 +229,7 @@ export function TutorialModal({
 
           {/* Progress Indicators Bar */}
           <div className="flex gap-1.5 mb-4 shrink-0">
-            {steps.map((_, idx) => (
+            {INTERACTIVE_STEPS.map((_, idx) => (
               <div
                 key={idx}
                 className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
@@ -301,15 +250,13 @@ export function TutorialModal({
           </div>
 
           {/* Interactive Arrow Cue Callout */}
-          {'pointerText' in stepData && (
-            <div className="mt-3 p-2.5 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-between gap-2 shrink-0">
-              <div className="flex items-center gap-2 text-[11px] text-accent font-bold">
-                <span className="animate-bounce">👇</span>
-                <span>{(stepData as any).pointerText}</span>
-              </div>
-              <span className="text-[10px] text-muted uppercase font-black tracking-wider">Guided Cue</span>
+          <div className="mt-3 p-2.5 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-2 text-[11px] text-accent font-bold">
+              <span className="animate-bounce">👇</span>
+              <span>{stepData.pointerText}</span>
             </div>
-          )}
+            <span className="text-[10px] text-muted uppercase font-black tracking-wider">Guided Cue</span>
+          </div>
 
           {/* Footer Controls */}
           <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/60 mt-4 shrink-0">
@@ -337,7 +284,7 @@ export function TutorialModal({
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))}
+                onClick={() => setCurrentStep((prev) => Math.min(INTERACTIVE_STEPS.length - 1, prev + 1))}
                 className="px-5 py-2.5 rounded-2xl bg-accent text-background font-bold text-xs shadow-lg shadow-accent/20"
               >
                 Next &rarr;
