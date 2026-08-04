@@ -30,7 +30,7 @@ function MainApp() {
   const { skills, addSkill, updateSkill, deleteSkill, resetToDefaultWorkspace } = useSkills()
   const { retention, setRetention, isWithinRetention } = useLogRetention()
   const { viewMode, setViewMode } = useTreeSettings()
-  const { isTutorialCompleted, completeTutorial, resetTutorial } = useTutorial()
+  const { completeTutorial, resetTutorial } = useTutorial()
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
@@ -194,18 +194,16 @@ function MainApp() {
         {/* Persistent Bottom Tab Bar */}
         <BottomTabBar currentScreen={screen} onNavigate={setScreen} />
 
-        {/* Floating Tutorial Button (Disappears when finished!) */}
-        {!isTutorialCompleted && (
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={() => setIsTutorialOpen(true)}
-            className="fixed bottom-[calc(80px+env(safe-area-inset-bottom)+12px)] left-4 sm:left-6 z-40 w-32 sm:w-36 py-3 px-3 bg-surface border border-accent/60 text-foreground font-extrabold rounded-full shadow-2xl flex items-center justify-center gap-1.5 backdrop-blur-md"
-          >
-            <span className="text-xs sm:text-sm shrink-0">📖</span>
-            <span className="text-[11px] sm:text-xs tracking-wide font-bold truncate">App Guide</span>
-          </motion.button>
-        )}
+        {/* Floating Tutorial Button (Always accessible on dashboard) */}
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={() => setIsTutorialOpen(true)}
+          className="fixed bottom-[calc(80px+env(safe-area-inset-bottom)+12px)] left-4 sm:left-6 z-40 w-32 sm:w-36 py-3 px-3 bg-surface border border-accent/60 text-foreground font-extrabold rounded-full shadow-2xl flex items-center justify-center gap-1.5 backdrop-blur-md"
+        >
+          <span className="text-xs sm:text-sm shrink-0">📖</span>
+          <span className="text-[11px] sm:text-xs tracking-wide font-bold truncate">App Guide</span>
+        </motion.button>
 
         {/* Global Modals */}
         <SettingsModal
