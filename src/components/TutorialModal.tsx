@@ -218,7 +218,8 @@ export function TutorialModal({
   const isLast = currentStep === steps.length - 1
 
   const handleFinish = () => {
-    if (onFinishTutorial) {
+    // Only mark initial onboarding tutorial as completed if doing the interactive first-time flow
+    if (onFinishTutorial && isInteractiveFlow) {
       onFinishTutorial()
     }
     onClose()
