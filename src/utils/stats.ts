@@ -16,6 +16,11 @@ export interface DailyTotal {
   reps: number
   holdTimeSeconds: number
   points: number
+  Push: number
+  Pull: number
+  Core: number
+  Legs: number
+  Skill: number
 }
 
 export interface SkillDistribution {
@@ -245,6 +250,7 @@ export function computeStats(entries: PushupEntry[], skills?: Skill[], filterSki
   const dayPointsMap = new Map<string, number>()
   const dayRepsMap = new Map<string, number>()
   const dayHoldMap = new Map<string, number>()
+  const dayDomainMap = new Map<string, Record<string, number>>()
   const dayKeys: string[] = []
 
   for (const entry of filteredEntries) {
@@ -252,6 +258,12 @@ export function computeStats(entries: PushupEntry[], skills?: Skill[], filterSki
     dayKeys.push(key)
     const pts = computeEntryPoints(entry, skillsMap)
     dayPointsMap.set(key, (dayPointsMap.get(key) ?? 0) + pts)
+
+    const skill = skillsMap.get(entry.skillId || 'pushups')
+    const domain = skill?.domain || 'Push'
+    const domainPoints = dayDomainMap.get(key) || { Push: 0, Pull: 0, Core: 0, Legs: 0, Skill: 0 }
+    domainPoints[domain] = (domainPoints[domain] || 0) + pts
+    dayDomainMap.set(key, domainPoints)
 
     if (isTimeEntry(entry, skillsMap)) {
       dayHoldMap.set(key, (dayHoldMap.get(key) ?? 0) + entry.amount)
@@ -299,6 +311,7 @@ export function computeStats(entries: PushupEntry[], skills?: Skill[], filterSki
     d.setDate(d.getDate() - i)
     const key = getDayKey(d)
     const pts = roundTenth(dayPointsMap.get(key) ?? 0)
+    const domains = dayDomainMap.get(key) || { Push: 0, Pull: 0, Core: 0, Legs: 0, Skill: 0 }
     dailyChart.push({
       date: key,
       label: formatShortDate(d),
@@ -306,6 +319,11 @@ export function computeStats(entries: PushupEntry[], skills?: Skill[], filterSki
       points: pts,
       reps: dayRepsMap.get(key) ?? 0,
       holdTimeSeconds: dayHoldMap.get(key) ?? 0,
+      Push: roundTenth(domains.Push || 0),
+      Pull: roundTenth(domains.Pull || 0),
+      Core: roundTenth(domains.Core || 0),
+      Legs: roundTenth(domains.Legs || 0),
+      Skill: roundTenth(domains.Skill || 0),
     })
   }
 
