@@ -22,12 +22,25 @@ import { NotificationsModal } from './components/NotificationsModal'
 import { TutorialModal } from './components/TutorialModal'
 import { OfflineIndicator } from './components/OfflineIndicator'
 
+import { useTournaments } from './hooks/useTournaments'
+
 function MainApp() {
   useAppTheme() // Initialize theme class on document element
   const { user, profile, loading: authLoading, isOffline: authIsOffline } = useAuth()
   const [screen, setScreen] = useState<Screen>('home')
   const { entries, add, update, remove, backgroundRefresh, isOnline, pendingCount } = usePushups(user?.id)
-  const { skills, addSkill, updateSkill, deleteSkill, resetToDefaultWorkspace } = useSkills()
+  const {
+    skills,
+    mainSkills,
+    profiles,
+    activeProfileId,
+    setActiveProfileId,
+    addSkill,
+    updateSkill,
+    deleteSkill,
+    resetToDefaultWorkspace,
+  } = useSkills()
+  const { tournaments, activeTournament, toggleActiveTournament, addTournamentPoints } = useTournaments()
   const { retention, setRetention, isWithinRetention } = useLogRetention()
   const { viewMode, setViewMode } = useTreeSettings()
   const { isTutorialCompleted, completeTutorial, resetTutorial } = useTutorial(user?.id)
@@ -37,6 +50,41 @@ function MainApp() {
   const [isTutorialOpen, setIsTutorialOpen] = useState(false)
 
   const stats = useMemo(() => computeStats(entries, skills), [entries, skills])
+
+  // Dual tracking handler when active tournament mode is enabled
+  const handleAddWorkoutEntry = async (amount: number, skillId?: string, skillName?: string) => {
+    if (!activeTournament) {
+      await add({ amount, skillId, skillName })
+      return
+    }
+
+    // Active Tournament Mode!
+    const tSkill =
+      activeTournament.skills.find((s) => s.id === skillId || s.name === skillName) ||
+      activeTournament.skills[0]
+    const ptsPerUnit = tSkill.pointsPerRep || 1
+    let pointsEarned = amount * ptsPerUnit
+    if (tSkill.trackingType === 'time') {
+      const unitSecs = tSkill.timeUnitSeconds || 1
+      pointsEarned = (amount / unitSecs) * ptsPerUnit
+    }
+    pointsEarned = Math.round(pointsEarned * 10) / 10
+
+    // Add points to tournament leaderboard
+    addTournamentPoints(activeTournament.id, pointsEarned)
+
+    // Check exercise mapping
+    const mappedMainSkillId = activeTournament.exerciseMappings[tSkill.id]
+    const mappedMainSkill =
+      mainSkills.find((s) => s.id === mappedMainSkillId) ||
+      mainSkills.find((s) => s.name === tSkill.name)
+
+    if (mappedMainSkill) {
+      await add({ amount, skillId: mappedMainSkill.id, skillName: mappedMainSkill.name })
+    } else {
+      await add({ amount, skillId, skillName })
+    }
+  }
 
   // Silent background sync when app returns to foreground or device reconnects
   useBackgroundRefresh(backgroundRefresh, !!user?.id)
@@ -94,10 +142,6 @@ function MainApp() {
   }
 
   // Least-privilege offline gate:
-  // If no user at all (no cache, never signed in on this device) → show login even offline.
-  // If user exists but no profile and we ARE online → show CreateProfileScreen.
-  // If user exists but no profile and we are OFFLINE → something went wrong with cache;
-  //   still block the app but DON'T demand profile creation they can't complete.
   if (!user) {
     return <AuthScreen />
   }
@@ -107,7 +151,6 @@ function MainApp() {
   }
 
   if (!profile && authIsOffline) {
-    // Rare: has cached user ID but no cached profile — show a simple waiting screen
     return (
       <div className="h-full w-full bg-background flex flex-col items-center justify-center gap-3 px-8 text-center">
         <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
@@ -133,13 +176,19 @@ function MainApp() {
       case 'skills':
         return (
           <SkillTreeScreen
-            skills={skills}
+            skills={activeTournament ? activeTournament.skills : skills}
             entries={entries}
+            profiles={profiles}
+            activeProfileId={activeProfileId}
+            onSwitchProfile={setActiveProfileId}
+            tournaments={tournaments}
+            activeTournament={activeTournament}
+            onToggleTournament={toggleActiveTournament}
             onAddSkill={addSkill}
             onUpdateSkill={updateSkill}
             onDeleteSkill={deleteSkill}
             onResetWorkspace={resetToDefaultWorkspace}
-            onAddEntry={(amount, skillId, skillName) => add({ amount, skillId, skillName })}
+            onAddEntry={handleAddWorkoutEntry}
             viewMode={viewMode}
             onSetViewMode={setViewMode}
           />
@@ -148,12 +197,13 @@ function MainApp() {
         return (
           <LoggingScreen
             entries={entries}
-            skills={skills}
-            onAdd={async (amt, sId, sName) => await add({ amount: amt, skillId: sId, skillName: sName })}
+            skills={activeTournament ? activeTournament.skills : skills}
+            onAdd={handleAddWorkoutEntry}
             onUpdate={async (id, amt) => await update(id, { amount: amt })}
             onDelete={async (id) => await remove(id)}
             isWithinRetention={isWithinRetention}
             retentionSetting={retention}
+            activeTournamentName={activeTournament?.name}
           />
         )
       case 'stats':

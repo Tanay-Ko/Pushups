@@ -14,6 +14,7 @@ interface LoggingScreenProps {
   onDelete: (id: string) => void
   isWithinRetention?: (timestamp: string) => boolean
   retentionSetting?: LogRetentionOption
+  activeTournamentName?: string
 }
 
 export function LoggingScreen({
@@ -24,6 +25,7 @@ export function LoggingScreen({
   onDelete,
   isWithinRetention,
   retentionSetting = '7-days',
+  activeTournamentName,
 }: LoggingScreenProps) {
   // Filter recent entries based on retention setting (cards expire/hide after retention period)
   const visibleEntries = useMemo(() => {
@@ -51,7 +53,7 @@ export function LoggingScreen({
         backgroundSize: '24px 24px',
       }}
     >
-      <header className="pt-8 pb-4 flex justify-between items-end">
+      <header className="pt-8 pb-3 flex justify-between items-end">
         <div className="flex items-center gap-2.5">
           <div className="w-0.5 h-5 rounded-full" style={{ background: 'linear-gradient(to bottom, var(--theme-gradient-start), var(--theme-gradient-end))' }} />
           <div>
@@ -63,6 +65,17 @@ export function LoggingScreen({
           Showing: {retentionLabel}
         </span>
       </header>
+
+      {activeTournamentName && (
+        <div className="mb-3 bg-accent/10 border border-accent/30 rounded-2xl p-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+            <span className="text-xs font-bold text-accent">🔥 Tournament Mode Active: {activeTournamentName}</span>
+          </div>
+          <span className="text-[10px] text-muted">Dual tracking enabled</span>
+        </div>
+      )}
+
 
       <AddPushupForm skills={skills} onAdd={onAdd} />
 

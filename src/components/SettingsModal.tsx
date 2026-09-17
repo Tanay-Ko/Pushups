@@ -158,12 +158,7 @@ export function SettingsModal({
 
             <div className="mb-6">
               <p className="text-sm text-muted mb-2">Notifications</p>
-              <div className="bg-background border border-border rounded-xl px-4 py-2 flex flex-col divide-y divide-border mb-6">
-                <NotificationToggle 
-                  label="Friend Milestones (50+ pushups)" 
-                  column="notify_milestones" 
-                  userId={profile?.id} 
-                />
+              <div className="bg-background border border-border rounded-xl px-4 py-1 flex flex-col mb-6">
                 <NotificationToggle 
                   label="Friend Requests" 
                   column="notify_friend_requests" 

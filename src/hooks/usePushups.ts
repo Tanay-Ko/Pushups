@@ -150,27 +150,49 @@ export function usePushups(userId?: string) {
     }
   }, [userId, flushSyncQueue, applyAndCache, mergeWithPending])
 
+  /** Migrate any local guest workout entries to Supabase cloud upon sign in */
+  const syncGuestEntriesToCloud = useCallback(async () => {
+    if (!userId || !isOnline) return
+    try {
+      const localEntries = await localPushupRepository.getAll()
+      if (localEntries.length === 0) return
+
+      console.log(`[Sync] Migrating ${localEntries.length} local guest entries to cloud for user ${userId}...`)
+      for (const entry of localEntries) {
+        await supabasePushupRepository.add({
+          amount: entry.amount,
+          skillId: entry.skillId,
+          skillName: entry.skillName,
+          timestamp: entry.timestamp,
+        })
+      }
+      // Clear local guest repository once migrated to cloud
+      localStorage.removeItem('calisthenics_pushup_entries')
+      localStorage.removeItem('calisthenics_entries_v1')
+    } catch (e) {
+      console.error('[Sync] Failed to sync local guest entries to cloud:', e)
+    }
+  }, [userId, isOnline])
+
   /** Full refresh from Supabase */
   const refresh = useCallback(async () => {
     setLoading(true)
     try {
       if (userId) {
-        // Flush any pending ops first, then fetch the canonical state
+        await syncGuestEntriesToCloud()
         await flushSyncQueue()
         const data = await supabasePushupRepository.getAll()
         applyAndCache(mergeWithPending(data))
       } else {
-        // Guest mode — use local repository only (no Supabase involved)
         const data = await localPushupRepository.getAll()
         applyAndCache(data)
       }
     } catch (e) {
       console.warn('[Pushups] Supabase unavailable, serving from cache:', e)
-      // Cache + pending entries already in state from seedEntries()
     } finally {
       setLoading(false)
     }
-  }, [userId, flushSyncQueue, applyAndCache, mergeWithPending])
+  }, [userId, syncGuestEntriesToCloud, flushSyncQueue, applyAndCache, mergeWithPending])
 
   // Initial load
   useEffect(() => {

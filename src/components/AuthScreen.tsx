@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../services/supabaseClient'
 import { Card } from './Card'
@@ -17,14 +17,38 @@ export function AuthScreen() {
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
+  useEffect(() => {
+    // Check if returning from OAuth redirect with error params in URL hash or query
+    const hash = window.location.hash || window.location.search
+    if (hash.includes('error_description=') || hash.includes('error=')) {
+      try {
+        const params = new URLSearchParams(hash.replace(/^#/, '?'))
+        const errDesc = params.get('error_description') || params.get('error')
+        if (errDesc) {
+          const decoded = decodeURIComponent(errDesc.replace(/\+/g, ' '))
+          if (decoded.includes('path is invalid') || decoded.includes('invalid')) {
+            setError(
+              `Google Sign-In configuration note: "${decoded}". Please ensure Supabase Dashboard -> Authentication -> URL Configuration -> Redirect URLs includes "${window.location.origin}/**".`,
+            )
+          } else {
+            setError(`Sign-In Error: ${decoded}`)
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse OAuth redirect error:', e)
+      }
+    }
+  }, [])
+
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true)
     setError(null)
     try {
+      const cleanOrigin = window.location.origin + window.location.pathname
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: cleanOrigin,
         },
       })
       if (error) throw error

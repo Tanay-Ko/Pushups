@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Skill } from '../models/Skill'
+import { useSkills } from '../hooks/useSkills'
 
 interface FriendProfileModalProps {
   isOpen: boolean
@@ -18,17 +20,26 @@ export function FriendProfileModal({
   totalReps,
   friendSkills,
 }: FriendProfileModalProps) {
-  const displaySkills: Partial<Skill>[] = friendSkills && friendSkills.length > 0
+  const { importAsNewProfile } = useSkills()
+  const [exported, setExported] = useState(false)
+
+  const displaySkills: Skill[] = friendSkills && friendSkills.length > 0
     ? friendSkills
     : [
-        { name: 'Push-ups', domain: 'Push', pointsPerRep: 1, trackingType: 'reps' },
-        { name: 'Sit ups', domain: 'Core', pointsPerRep: 1, trackingType: 'reps' },
-        { name: 'Pull ups', domain: 'Pull', pointsPerRep: 2, trackingType: 'reps' },
-        { name: 'Dips', domain: 'Push', pointsPerRep: 2, trackingType: 'reps' },
-        { name: 'Plank Hold', domain: 'Core', pointsPerRep: 1, trackingType: 'time', timeUnitSeconds: 30 },
-        { name: 'L-Sit Hold', domain: 'Core', pointsPerRep: 1, trackingType: 'time', timeUnitSeconds: 10 },
-        { name: 'Muscle Up', domain: 'Pull', pointsPerRep: 10, trackingType: 'reps' },
+        { id: 'f_pushups', name: 'Push-ups', domain: 'Push', pointsPerRep: 1, trackingType: 'reps', createdAt: new Date().toISOString() },
+        { id: 'f_situps', name: 'Sit ups', domain: 'Core', pointsPerRep: 1, trackingType: 'reps', createdAt: new Date().toISOString() },
+        { id: 'f_pullups', name: 'Pull ups', domain: 'Pull', pointsPerRep: 2, trackingType: 'reps', createdAt: new Date().toISOString() },
+        { id: 'f_dips', name: 'Dips', domain: 'Push', pointsPerRep: 2, trackingType: 'reps', createdAt: new Date().toISOString() },
+        { id: 'f_plank', name: 'Plank Hold', domain: 'Core', pointsPerRep: 1, trackingType: 'time', timeUnitSeconds: 30, createdAt: new Date().toISOString() },
+        { id: 'f_lsit', name: 'L-Sit Hold', domain: 'Core', pointsPerRep: 1, trackingType: 'time', timeUnitSeconds: 10, createdAt: new Date().toISOString() },
+        { id: 'f_muscleup', name: 'Muscle Up', domain: 'Pull', pointsPerRep: 10, trackingType: 'reps', createdAt: new Date().toISOString() },
       ]
+
+  const handleExportScheme = () => {
+    importAsNewProfile(`${friendUsername}'s Scheme Profile`, displaySkills)
+    setExported(true)
+    setTimeout(() => setExported(false), 3000)
+  }
 
   return (
     <AnimatePresence>
@@ -128,12 +139,12 @@ export function FriendProfileModal({
             </div>
 
             <div className="mt-3 pt-2.5 border-t border-border/60 flex justify-between items-center text-[10px] sm:text-[11px] text-muted shrink-0">
-              <span>Syncing with friends...</span>
+              <span>{exported ? '✅ Saved as secondary profile!' : 'Export to your workspace profiles'}</span>
               <button
-                onClick={() => alert('Exporting Points Scheme coming soon!')}
-                className="text-accent font-semibold hover:underline"
+                onClick={handleExportScheme}
+                className="text-accent font-bold hover:underline"
               >
-                Export Scheme &rarr;
+                Save Profile &rarr;
               </button>
             </div>
           </motion.div>
@@ -142,3 +153,4 @@ export function FriendProfileModal({
     </AnimatePresence>
   )
 }
+

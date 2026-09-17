@@ -8,9 +8,18 @@ import { AddSkillModal } from '../components/AddSkillModal'
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal'
 import { QuickLogModal } from '../components/QuickLogModal'
 
+import type { SchemeProfile } from '../hooks/useSkills'
+import type { Tournament } from '../models/Tournament'
+
 interface SkillTreeScreenProps {
   skills: Skill[]
   entries: PushupEntry[]
+  profiles?: SchemeProfile[]
+  activeProfileId?: string
+  onSwitchProfile?: (profileId: string) => void
+  tournaments?: Tournament[]
+  activeTournament?: Tournament | null
+  onToggleTournament?: (tournamentId: string | null) => void
   onAddSkill: (input: CreateSkillInput) => void
   onUpdateSkill?: (id: string, updates: Partial<Skill>) => void
   onDeleteSkill?: (id: string) => void
@@ -71,6 +80,12 @@ interface NodePosition {
 export function SkillTreeScreen({
   skills,
   entries,
+  profiles,
+  activeProfileId,
+  onSwitchProfile,
+  tournaments = [],
+  activeTournament,
+  onToggleTournament,
   onAddSkill,
   onUpdateSkill,
   onDeleteSkill,
@@ -79,6 +94,7 @@ export function SkillTreeScreen({
   viewMode = 'node-graph',
   onSetViewMode,
 }: SkillTreeScreenProps) {
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
   const [deletingSkill, setDeletingSkill] = useState<Skill | null>(null)
@@ -172,9 +188,8 @@ export function SkillTreeScreen({
   }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      calculateConnections()
-    }, 100)
+    calculateConnections()
+    const timer = setTimeout(calculateConnections, 100)
     window.addEventListener('resize', calculateConnections)
     return () => {
       clearTimeout(timer)
@@ -207,6 +222,20 @@ export function SkillTreeScreen({
       return `${pts}pt/${unit}s`
     }
     return `${pts}x pts`
+  }
+
+  const dropdownValue = activeTournament
+    ? `tourney_${activeTournament.id}`
+    : activeProfileId || 'main'
+
+  const handleDropdownChange = (val: string) => {
+    if (val.startsWith('tourney_')) {
+      const tourneyId = val.replace('tourney_', '')
+      if (onToggleTournament) onToggleTournament(tourneyId)
+    } else {
+      if (onToggleTournament) onToggleTournament(null)
+      if (onSwitchProfile) onSwitchProfile(val)
+    }
   }
 
   return (
@@ -250,7 +279,28 @@ export function SkillTreeScreen({
           <div className="w-0.5 h-5 rounded-full" style={{ background: 'linear-gradient(to bottom, var(--theme-gradient-start), var(--theme-gradient-end))' }} />
           <div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight" style={{ color: '#f0f0f0' }}>Skill Tree</h2>
-            <p className="text-[10px] sm:text-xs mt-0.5" style={{ color: 'rgba(100,100,100,0.8)' }}>Dynamic Calisthenics Workspace</p>
+            <select
+              value={dropdownValue}
+              onChange={(e) => handleDropdownChange(e.target.value)}
+              className="mt-0.5 bg-surface border border-accent/40 text-accent font-bold text-[10px] sm:text-xs rounded-lg px-2 py-0.5 focus:outline-none cursor-pointer max-w-[170px] truncate"
+            >
+              <optgroup label="Workspace Profiles">
+                {profiles?.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} {p.isMain ? '(Main)' : ''}
+                  </option>
+                ))}
+              </optgroup>
+              {tournaments.length > 0 && (
+                <optgroup label="🔥 Tournaments (1-Tap Mode)">
+                  {tournaments.map((t) => (
+                    <option key={t.id} value={`tourney_${t.id}`}>
+                      🔥 Tourney: {t.name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
           </div>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
@@ -289,6 +339,7 @@ export function SkillTreeScreen({
             </button>
           </div>
 
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -299,10 +350,35 @@ export function SkillTreeScreen({
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            Add Node
+            <span>+ Skill</span>
           </motion.button>
         </div>
       </header>
+
+      {/* Prominent Active Tournament Mode Banner */}
+      {activeTournament && (
+        <div className="bg-gradient-to-r from-amber-500/20 via-accent/20 to-orange-500/20 border border-amber-500/50 rounded-2xl p-2.5 mb-2.5 flex justify-between items-center shrink-0 shadow-lg shadow-amber-500/10 z-10">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-black text-amber-400 uppercase tracking-wider">
+                  🔥 TOURNAMENT MODE ACTIVE
+                </span>
+              </div>
+              <span className="text-xs font-extrabold text-foreground block line-clamp-1">
+                {activeTournament.name}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => onToggleTournament && onToggleTournament(null)}
+            className="text-[11px] font-bold px-3 py-1 rounded-xl bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 shrink-0"
+          >
+            Exit Mode
+          </button>
+        </div>
+      )}
 
       {/* Top Filter & Reset Toolbar */}
       <div className="flex justify-between items-center mb-2.5 shrink-0">

@@ -71,10 +71,11 @@ export function useNotifications() {
     const { data } = await supabase
       .from('notifications')
       .select('*')
+      .neq('type', 'milestone')
       .order('created_at', { ascending: false })
       .limit(50)
 
-    let list: Notification[] = (data as Notification[]) || []
+    let list: Notification[] = ((data as Notification[]) || []).filter((n) => n.type !== 'milestone')
 
     // Ensure welcome notification exists
     const hasWelcome = list.some((n) => n.type === 'system_welcome')
