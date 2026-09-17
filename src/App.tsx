@@ -209,7 +209,7 @@ function MainApp() {
       case 'stats':
         return <StatsScreen entries={entries} skills={skills} />
       case 'friends':
-        return <FriendsScreen />
+        return <FriendsScreen userLifetimePoints={stats.lifetimePoints} skills={skills} />
       default:
         return null
     }

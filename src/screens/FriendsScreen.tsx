@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { Variants } from 'framer-motion'
+import type { Skill } from '../models/Skill'
 import { Card } from '../components/Card'
 import { useFriends } from '../hooks/useFriends'
 import { useAuth } from '../hooks/useAuth'
@@ -24,10 +25,16 @@ const itemVariants: Variants = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
 }
 
-export function FriendsScreen() {
+interface FriendsScreenProps {
+  userLifetimePoints?: number
+  skills?: Skill[]
+}
+
+export function FriendsScreen({ userLifetimePoints, skills }: FriendsScreenProps) {
   const { signOut } = useAuth()
   const { mainSkills } = useSkills()
-  const { friends, leaderboard, loading, sendRequest, acceptRequest, removeFriend, searchUsers } = useFriends()
+  const { friends, leaderboard, loading, sendRequest, acceptRequest, removeFriend, searchUsers } =
+    useFriends(userLifetimePoints, skills || mainSkills)
   const {
     tournaments,
     activeTournamentId,

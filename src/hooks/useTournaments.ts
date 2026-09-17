@@ -16,7 +16,7 @@ const DEFAULT_TOURNAMENTS: Tournament[] = [
     endDate: '2026-12-31',
     skills: DEFAULT_SKILLS.map((s) => ({
       ...s,
-      pointsPerRep: s.id === 'pushups' ? 2 : s.pointsPerRep, // Slightly tweaked points for tourney
+      pointsPerRep: s.id === 'pushups' ? 2 : s.pointsPerRep,
     })),
     exerciseMappings: {
       pushups: 'pushups',
@@ -26,11 +26,7 @@ const DEFAULT_TOURNAMENTS: Tournament[] = [
       dips: 'dips',
       'muscle-up': 'muscle-up',
     },
-    members: [
-      { id: 'user_1', username: 'Alex_G', points: 340 },
-      { id: 'user_2', username: 'SarahFit', points: 280 },
-      { id: 'user_3', username: 'IronMike', points: 195 },
-    ],
+    members: [],
     createdAt: new Date().toISOString(),
   },
 ]
@@ -40,7 +36,14 @@ function loadTournaments(): Tournament[] {
     const raw = localStorage.getItem(TOURNAMENTS_STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((t: Tournament) => ({
+          ...t,
+          members: (t.members || []).filter(
+            (m) => !['user_1', 'user_2', 'user_3'].includes(m.id) && !['Alex_G', 'SarahFit', 'IronMike'].includes(m.username)
+          ),
+        }))
+      }
     }
   } catch (e) {
     console.error('Failed to load tournaments:', e)
