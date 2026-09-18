@@ -67,6 +67,8 @@ export function FriendsScreen({ userLifetimePoints, skills }: FriendsScreenProps
   }
 
   const pendingReceived = friends.filter((f) => f.status === 'pending_received')
+  const pendingSent = friends.filter((f) => f.status === 'pending_sent')
+  const acceptedFriends = friends.filter((f) => f.status === 'accepted')
 
   return (
     <div
@@ -230,11 +232,11 @@ export function FriendsScreen({ userLifetimePoints, skills }: FriendsScreenProps
               </Card>
             </motion.div>
 
-            {/* Friend Requests */}
+            {/* Incoming Friend Requests */}
             {pendingReceived.length > 0 && (
               <motion.div variants={itemVariants}>
                 <Card>
-                  <p className="text-sm text-accent mb-3 font-medium">Friend Requests</p>
+                  <p className="text-sm text-accent mb-3 font-medium">Incoming Friend Requests</p>
                   <div className="flex flex-col gap-2">
                     {pendingReceived.map((req) => (
                       <div
@@ -258,6 +260,82 @@ export function FriendsScreen({ userLifetimePoints, skills }: FriendsScreenProps
                         </div>
                       </div>
                     ))}
+                  </div>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Outgoing Sent Friend Requests */}
+            {pendingSent.length > 0 && (
+              <motion.div variants={itemVariants}>
+                <Card>
+                  <p className="text-sm text-muted mb-3 font-medium">Pending Sent Requests</p>
+                  <div className="flex flex-col gap-2">
+                    {pendingSent.map((req) => (
+                      <div
+                        key={req.id}
+                        className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border"
+                      >
+                        <span className="font-medium text-sm text-muted">@{req.username}</span>
+                        <button
+                          onClick={() => removeFriend(req.friendshipId!)}
+                          className="bg-surface border border-border text-xs text-red-400 font-semibold px-3 py-1.5 rounded-full hover:bg-red-500/10"
+                        >
+                          Cancel Request
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* My Friends List */}
+            {acceptedFriends.length > 0 && (
+              <motion.div variants={itemVariants}>
+                <Card>
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="text-sm text-foreground font-semibold">My Friends ({acceptedFriends.length})</p>
+                    <span className="text-[10px] text-muted">Tap to view scheme profile</span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {acceptedFriends.map((friend) => {
+                      const leaderboardPts = leaderboard.find((l) => l.id === friend.id)?.total || 0
+                      return (
+                        <div
+                          key={friend.id}
+                          className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border"
+                        >
+                          <div
+                            onClick={() => setInspectFriend({ username: friend.username, total: leaderboardPts })}
+                            className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
+                          >
+                            <div className="w-7 h-7 rounded-lg bg-accent/10 border border-accent/20 text-accent font-bold text-xs flex items-center justify-center">
+                              @{friend.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <span className="font-bold text-sm text-foreground block">@{friend.username}</span>
+                              <span className="text-[10px] text-accent font-medium">{leaderboardPts.toLocaleString()} pts</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setInspectFriend({ username: friend.username, total: leaderboardPts })}
+                              className="text-xs text-accent font-semibold px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/20"
+                            >
+                              Scheme
+                            </button>
+                            <button
+                              onClick={() => removeFriend(friend.friendshipId!)}
+                              className="text-xs text-muted hover:text-red-400 font-medium px-2 py-1"
+                              title="Unfriend"
+                            >
+                              Unfriend
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </Card>
               </motion.div>
