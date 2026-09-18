@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from './useAuth'
 import { DEFAULT_SKILLS } from './useSkills'
@@ -24,11 +24,16 @@ export function useFriends(userLifetimePoints?: number, skills?: Skill[]) {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
 
-  const skillsMap = new Map((skills && skills.length > 0 ? skills : DEFAULT_SKILLS).map((s) => [s.id, s]))
+  const skillsMap = useMemo(
+    () => new Map((skills && skills.length > 0 ? skills : DEFAULT_SKILLS).map((s) => [s.id, s])),
+    [skills],
+  )
 
   const fetchFriends = useCallback(async () => {
     if (!user) return
-    setLoading(true)
+    if (friends.length === 0 && leaderboard.length === 0) {
+      setLoading(true)
+    }
 
     // Fetch all friendships for this user
     const { data: friendships, error } = await supabase
