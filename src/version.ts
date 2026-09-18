@@ -11,5 +11,5 @@
  * Update APP_VERSION here before every production build + push.
  */
 
-export const APP_VERSION = '1.5.9'
+export const APP_VERSION = '1.6.0'
 export const APP_BUILD_DATE = '2026-09-17'

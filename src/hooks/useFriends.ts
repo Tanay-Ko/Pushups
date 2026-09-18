@@ -83,24 +83,29 @@ export function useFriends(userLifetimePoints?: number, skills?: Skill[]) {
 
     const totals: Record<string, number> = {}
 
-    const { data: pushups } = await supabase
+    const { data: pushups, error: pError } = await supabase
       .from('pushup_entries')
-      .select('user_id, amount, skill_id, skill_name')
+      .select('*')
       .in('user_id', acceptedIds)
 
-    if (pushups) {
-      pushups.forEach((p) => {
+    if (pError) {
+      console.error('[Friends] pushup_entries fetch error:', pError)
+    }
+
+    if (pushups && pushups.length > 0) {
+      pushups.forEach((p: any) => {
         const entryObj = {
-          id: 'temp',
-          amount: p.amount,
-          skillId: p.skill_id,
-          skillName: p.skill_name,
-          timestamp: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          id: p.id || 'temp',
+          amount: Number(p.amount) || 0,
+          skillId: p.skill_id || 'f_pushups',
+          skillName: p.skill_name || 'Push-ups',
+          timestamp: p.timestamp || new Date().toISOString(),
+          createdAt: p.created_at || new Date().toISOString(),
+          updatedAt: p.created_at || new Date().toISOString(),
         }
         const pts = computeEntryPoints(entryObj, skillsMap)
-        totals[p.user_id] = (totals[p.user_id] || 0) + pts
+        const effectivePts = pts > 0 ? pts : (Number(p.amount) || 0)
+        totals[p.user_id] = (totals[p.user_id] || 0) + effectivePts
       })
     }
 
