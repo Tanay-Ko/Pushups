@@ -1,0 +1,14 @@
+name: Source Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-security:
+    uses: Tanay-Ko/vuln-scanner/.github/workflows/source-security.yml@da19725883ecf1eb5281ff79fbb22002586426c7
