@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Skill, CreateSkillInput } from '../models/Skill'
 import type { PushupEntry } from '../models/PushupEntry'
 import type { TreeViewMode } from '../hooks/useTreeSettings'
-import { computeEntryPoints, roundTenth } from '../utils/stats'
+import { computeEntryPoints, formatHoldTime, roundTenth } from '../utils/stats'
 import { AddSkillModal } from '../components/AddSkillModal'
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal'
 import { QuickLogModal } from '../components/QuickLogModal'
@@ -109,14 +109,20 @@ export function SkillTreeScreen({
   const skillsMap = useMemo(() => new Map(skills.map((s) => [s.id, s])), [skills])
 
   const skillStats = useMemo(() => {
-    const stats: Record<string, { reps: number; points: number }> = {}
-    skills.forEach((s) => (stats[s.id] = { reps: 0, points: 0 }))
+    const stats: Record<string, { reps: number; points: number; personalRecord: number }> = {}
+    skills.forEach((s) => (stats[s.id] = { reps: 0, points: 0, personalRecord: 0 }))
     entries.forEach((e) => {
-      const sId = e.skillId || 'pushups'
+      const matchedSkill = skills.find(
+        (skill) =>
+          skill.id === e.skillId ||
+          (e.skillName && skill.name.toLowerCase().trim() === e.skillName.toLowerCase().trim()),
+      )
+      const sId = matchedSkill?.id || e.skillId || 'pushups'
       const pts = computeEntryPoints(e, skillsMap)
-      if (!stats[sId]) stats[sId] = { reps: 0, points: 0 }
+      if (!stats[sId]) stats[sId] = { reps: 0, points: 0, personalRecord: 0 }
       stats[sId].reps += e.amount
       stats[sId].points = roundTenth(stats[sId].points + pts)
+      stats[sId].personalRecord = Math.max(stats[sId].personalRecord, e.amount)
     })
     return stats
   }, [skills, entries, skillsMap])
@@ -445,6 +451,17 @@ export function SkillTreeScreen({
                     </strong>{' '}
                     ({(skillStats[selectedSkill.id]?.reps || 0).toLocaleString()} {selectedSkill.trackingType === 'time' ? 'secs' : 'reps'})
                   </p>
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-xl border border-amber-400/30 bg-amber-400/10 px-2.5 py-1.5">
+                    <span className="text-xs">🏆</span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-300">Personal Record</span>
+                    <span className="text-xs font-black text-amber-200">
+                      {skillStats[selectedSkill.id]?.personalRecord
+                        ? selectedSkill.trackingType === 'time'
+                          ? formatHoldTime(skillStats[selectedSkill.id].personalRecord)
+                          : `${skillStats[selectedSkill.id].personalRecord.toLocaleString()} reps`
+                        : 'Not set yet'}
+                    </span>
+                  </div>
                 </div>
                 <button onClick={() => setSelectedSkillId(null)} className="p-1 text-muted hover:text-foreground">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
