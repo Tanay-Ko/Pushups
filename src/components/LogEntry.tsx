@@ -8,15 +8,18 @@ import { computeEntryPoints } from '../utils/stats'
 interface LogEntryProps {
   entry: PushupEntry
   skills?: Skill[]
+  isPersonalRecord?: boolean
   onUpdate: (id: string, amount: number) => void
   onDelete: (id: string) => void
 }
 
-export function LogEntry({ entry, skills = [], onUpdate, onDelete }: LogEntryProps) {
+export function LogEntry({ entry, skills = [], isPersonalRecord = false, onUpdate, onDelete }: LogEntryProps) {
   const [editing, setEditing] = useState(false)
   const [amount, setAmount] = useState(String(entry.amount))
 
-  const isTime = entry.trackingType === 'time'
+  const isTime = entry.trackingType === 'time' || skills.some(
+    (skill) => skill.id === entry.skillId && skill.trackingType === 'time',
+  )
 
   const skillsMap = useMemo(() => new Map(skills.map(s => [s.id, s])), [skills])
   const pointsEarned = useMemo(() => computeEntryPoints(entry, skillsMap), [entry, skillsMap])
@@ -71,6 +74,11 @@ export function LogEntry({ entry, skills = [], onUpdate, onDelete }: LogEntryPro
               <span className="text-[10px] sm:text-xs font-black text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-full tabular-nums">
                 +{pointsEarned} pts
               </span>
+              {isPersonalRecord && (
+                <span className="text-[10px] sm:text-xs font-black text-amber-300 bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                  PR
+                </span>
+              )}
             </div>
           </motion.div>
         )}

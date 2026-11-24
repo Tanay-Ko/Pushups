@@ -70,6 +70,7 @@ export interface PushupStats {
 
   // Single-skill peak PRs
   maxSingleAmount: number
+  personalRecordCount: number
 
   // Averages & totals
   averagePerDay: number
@@ -134,6 +135,29 @@ export function computeEntryPoints(entry: PushupEntry, skillsMap: Map<string, Sk
   }
 
   return roundTenth(entry.amount * pointsPerRep)
+}
+
+export function getPersonalRecordEntryIds(entries: PushupEntry[]): Set<string> {
+  const sortedEntries = [...entries].sort((a, b) => {
+    const timestampDifference = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    if (timestampDifference !== 0) return timestampDifference
+
+    const createdDifference = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    return createdDifference !== 0 ? createdDifference : a.id.localeCompare(b.id)
+  })
+  const bestBySkill = new Map<string, number>()
+  const personalRecords = new Set<string>()
+
+  for (const entry of sortedEntries) {
+    const skillKey = entry.skillId || entry.skillName?.trim().toLowerCase() || 'pushups'
+    const previousBest = bestBySkill.get(skillKey) ?? 0
+    if (entry.amount > previousBest) {
+      personalRecords.add(entry.id)
+      bestBySkill.set(skillKey, entry.amount)
+    }
+  }
+
+  return personalRecords
 }
 
 function calculateStreaks(dayKeys: string[]): StreakStats {
@@ -304,6 +328,7 @@ export function computeStats(entries: PushupEntry[], skills?: Skill[], filterSki
     .sort((a, b) => b.points - a.points)
 
   const totalSessions = filteredEntries.length
+  const personalRecordCount = getPersonalRecordEntryIds(filteredEntries).size
 
   const dailyChart: DailyTotal[] = []
   for (let i = CHART_DAYS - 1; i >= 0; i--) {
@@ -354,6 +379,7 @@ export function computeStats(entries: PushupEntry[], skills?: Skill[], filterSki
     holdPointsPercent,
 
     maxSingleAmount: lifetimeAgg.maxAmount,
+    personalRecordCount,
 
     averagePerDay: streak.activeDaysCount > 0 ? roundTenth(lifetimePoints / streak.activeDaysCount) : 0,
     averagePerWorkout: totalSessions > 0 ? roundTenth(lifetimePoints / totalSessions) : 0,

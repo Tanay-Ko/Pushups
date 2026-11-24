@@ -308,6 +308,10 @@ export function StatsScreen({ entries, skills }: StatsScreenProps) {
                 <span className="text-muted text-[10px] block font-semibold">TOTAL SESSIONS</span>
                 <span className="text-foreground font-black text-sm">{stats.totalSessions} sets</span>
               </div>
+              <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                <span className="text-muted text-[10px] block font-semibold">PERSONAL RECORDS</span>
+                <span className="text-amber-300 font-black text-sm">{stats.personalRecordCount} PRs</span>
+              </div>
             </div>
           </Card>
         </motion.div>

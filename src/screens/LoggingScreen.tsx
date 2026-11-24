@@ -5,6 +5,7 @@ import { LogEntry } from '../components/LogEntry'
 import type { PushupEntry } from '../models/PushupEntry'
 import type { Skill } from '../models/Skill'
 import type { LogRetentionOption } from '../hooks/useLogRetention'
+import { getPersonalRecordEntryIds } from '../utils/stats'
 
 interface LoggingScreenProps {
   entries: PushupEntry[]
@@ -35,6 +36,7 @@ export function LoggingScreen({
     if (!isWithinRetention) return sorted
     return sorted.filter((e) => isWithinRetention(e.timestamp))
   }, [entries, isWithinRetention])
+  const personalRecordIds = useMemo(() => getPersonalRecordEntryIds(entries), [entries])
 
   const retentionLabel = retentionSetting === '1-day'
     ? '24 hours'
@@ -107,6 +109,7 @@ export function LoggingScreen({
                 <LogEntry
                   entry={entry}
                   skills={skills}
+                  isPersonalRecord={personalRecordIds.has(entry.id)}
                   onUpdate={onUpdate}
                   onDelete={onDelete}
                 />
